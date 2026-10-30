@@ -133,6 +133,23 @@ body{
   box-shadow: 0 0 15px var(--accent);
 }
 
+.price-card.beta {
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 30px var(--glow);
+  transform: scale(1.1);
+}
+.price-card.beta:hover {
+  transform: scale(1.1) translateY(-8px);
+}
+.beta-badge {
+  position: absolute;
+  top: -14px; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: var(--btn-text);
+  padding: 6px 18px; border-radius: 20px;
+  font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
+  box-shadow: 0 0 15px var(--accent);
+}
+
 .price-card h3 {
   font-size: 22px; font-weight: 800; text-transform: uppercase;
   letter-spacing: 1px; margin-bottom: 8px;
@@ -219,7 +236,7 @@ footer a svg { width: 16px; height: 16px; }
 <section class="pricing-section">
   <div class="section-head reveal">
     <h1>Choose Your <span>Plan</span></h1>
-    <p>Select the perfect tier for your needs. All plans include full access to Archnemesis features.</p>
+    <p>Select the perfect tier for your needs. Premium/Beta plans include full access to Archnemesis features.</p>
   </div>
 
   <div class="pricing-grid">
@@ -251,7 +268,8 @@ footer a svg { width: 16px; height: 16px; }
     </div>
 
     <!-- BETA TIER -->
-    <div class="price-card reveal">
+    <div class="price-card beta reveal">
+      <div class="beta-badge">Best Option</div>
       <h3>Beta</h3>
       <p class="desc">Early access testing</p>
       <ul class="price-list">
