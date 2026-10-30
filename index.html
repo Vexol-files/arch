@@ -16,8 +16,8 @@
 /* DARK THEME */
 [data-theme="dark"]{
   --bg-overlay:rgba(2, 2, 3, 0.85);
-  --surface-tile-1:rgba(255, 255, 255, 0.03); /* Jaśniejszy róg kafelka */
-  --surface-tile-2:rgba(0, 0, 0, 0.5);       /* Ciemniejszy róg kafelka */
+  --surface-tile-1:rgba(255, 255, 255, 0.03);
+  --surface-tile-2:rgba(0, 0, 0, 0.5);
   --border:rgba(0, 229, 255, 0.15);
   --border-hover:rgba(0, 229, 255, 0.6);
   --text:#ffffff;
@@ -29,8 +29,8 @@
 /* LIGHT THEME */
 [data-theme="light"]{
   --bg-overlay:rgba(244, 247, 249, 0.85);
-  --surface-tile-1:rgba(255, 255, 255, 0.8); /* Jaśniejszy róg kafelka */
-  --surface-tile-2:rgba(0, 0, 0, 0.05);      /* Ciemniejszy róg kafelka */
+  --surface-tile-1:rgba(255, 255, 255, 0.8);
+  --surface-tile-2:rgba(0, 0, 0, 0.05);
   --border:rgba(0, 0, 0, 0.1);
   --border-hover:rgba(0, 153, 204, 0.5);
   --text:#0f172a;
@@ -49,8 +49,6 @@ body{
   transition:color var(--transition);
   min-height:100vh;overflow-x:hidden;
   line-height:1.6;
-  
-  /* TŁO Z WALLPAPER.PNG + NAKŁADKA */
   background-image: 
     linear-gradient(var(--bg-overlay), var(--bg-overlay)), 
     url('wallpaper.png');
@@ -58,7 +56,7 @@ body{
   background-position: center;
   background-attachment: fixed;
   background-repeat: no-repeat;
-  background-color: #020203; /* Fallback */
+  background-color: #020203;
 }
 
 /* ---------- NAV ---------- */
@@ -157,7 +155,7 @@ body{
 }
 .section-head p{color:var(--text-dim);font-size:16px;max-width:600px;margin:0 auto}
 
-/* ---------- TILES (TRANSPARENT GRADIENT) ---------- */
+/* ---------- TILES ---------- */
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
@@ -165,12 +163,9 @@ body{
 }
 .tile{
   position:relative;padding:32px;
-  
-  /* Gradient: w jednym rogu jaśniej, w drugim ciemniej */
   background: linear-gradient(135deg, var(--surface-tile-1) 0%, var(--surface-tile-2) 100%);
-  backdrop-filter: blur(12px); /* Efekt szkła */
+  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  
   border:1px solid var(--border);
   border-radius:var(--radius);
   transition:all var(--transition);overflow:hidden;
@@ -261,7 +256,7 @@ footer a svg{width:16px;height:16px;}
 
 <!-- ========== NAV ========== -->
 <nav class="nav">
-  <a href="#" class="logo">
+  <a href="index.html" class="logo">
     <img src="logo.png" alt="Archnemesis Logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
     <span style="display:none;">Archnemesis</span>
   </a>
@@ -270,6 +265,13 @@ footer a svg{width:16px;height:16px;}
       <svg class="sun-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
       <svg class="moon-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
     </button>
+    
+    <!-- PRICING BUTTON (NAV) -->
+    <a href="pricing.html" class="nav-btn">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+      <span>Pricing</span>
+    </a>
+
     <a href="#" id="discordNav" class="nav-btn">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>
       <span>Discord</span>
@@ -293,9 +295,8 @@ footer a svg{width:16px;height:16px;}
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>
       Join Discord
     </a>
-    <a href="#" id="loginHero" class="cta cta-secondary">
-      Client Login
-    </a>
+    <a href="pricing.html" class="cta cta-secondary">View Pricing</a>
+    <a href="#" id="loginHero" class="cta cta-secondary">Client Login</a>
   </div>
 </section>
 
@@ -335,13 +336,14 @@ footer a svg{width:16px;height:16px;}
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>
       Join Discord
     </a>
-    <a href="#" id="loginCta" class="cta cta-secondary">Login Now</a>
+    <a href="pricing.html" class="cta cta-secondary">Get Started</a>
   </div>
 </div>
 
 <!-- ========== FOOTER ========== -->
 <footer>
   © 2024 <strong>Archnemesis</strong> — All rights reserved · 
+  <a href="pricing.html">Pricing</a> · 
   <a href="#" id="discordFooter">
     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>
     Discord
@@ -362,7 +364,7 @@ const CONFIG = {
   document.getElementById(id).href = CONFIG.DISCORD_URL;
   document.getElementById(id).target = '_blank';
 });
-['loginNav','loginHero','loginCta','loginFooter'].forEach(id => {
+['loginNav','loginHero','loginFooter'].forEach(id => {
   document.getElementById(id).href = CONFIG.LOGIN_URL;
 });
 
@@ -423,46 +425,4 @@ const ICONS = {
   gear:'<circle cx="12" cy="12" r="3"/><path stroke-linecap="round" d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',
   cursor:'<path stroke-linecap="round" stroke-linejoin="round" d="M3 3l7 18 3-7 7-3-17-8z"/>',
   sparkle:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2z"/>',
-  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path stroke-linecap="round" d="M8 11V7a4 4 0 018 0v4"/>',
-  cloud:'<path stroke-linecap="round" stroke-linejoin="round" d="M18 18a4 4 0 000-8 6 6 0 00-11.7-1.5A4 4 0 006 18h12z"/>',
-  user:'<circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 22a8 8 0 0116 0"/>'
-};
-
-function iconSVG(name){
-  return `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONS[name]||ICONS.sparkle}</svg>`;
-}
-
-/* ---------- RENDERING ---------- */
-document.getElementById('featuresGrid').innerHTML = features.map(f => `
-  <div class="tile reveal">
-    <div class="tile-icon">${iconSVG(f.icon)}</div>
-    <h3>${f.title}</h3>
-    <p>${f.desc}</p>
-  </div>
-`).join('');
-
-document.getElementById('infoGrid').innerHTML = infoTiles.map(t => `
-  <div class="tile reveal ${t.wide?'wide':''} ${t.accent?'tile-accent':''}">
-    <div class="tile-icon">${iconSVG(t.icon)}</div>
-    <h3>${t.title}</h3>
-    <p>${t.desc}</p>
-  </div>
-`).join('');
-
-document.getElementById('faqGrid').innerHTML = faqs.map(f => `
-  <div class="faq reveal"><h4>${f.q}</h4><p>${f.a}</p></div>
-`).join('');
-
-/* ---------- SCROLL REVEAL ---------- */
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      io.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.1 });
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-</script>
-</body>
-</html>
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path stroke-linecap="round" d="M8 11V7a4 4 0 018 
