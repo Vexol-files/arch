@@ -13,6 +13,7 @@
   --radius:10px;
   --transition:.3s ease;
   --font:'Segoe UI', system-ui, sans-serif;
+  --accent-beta: #a855f7; /* Nowy kolor dla Bety (fiolet) */
 }
 [data-theme="dark"]{
   --bg-overlay:rgba(2, 2, 3, 0.85);
@@ -39,6 +40,7 @@
   --btn-text:#000;
   --accent:#0099cc;
   --accent-hover:#007aa3;
+  --accent-beta: #7e22ce; /* Ciemniejszy fiolet dla jasnego tła */
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -134,20 +136,21 @@ body{
 }
 
 .price-card.beta {
-  border: 2px solid var(--accent);
-  box-shadow: 0 0 30px var(--glow);
-  transform: scale(1.1);
+  border: 2px solid var(--accent-beta);
+  box-shadow: 0 0 30px var(--accent-beta); /* Używamy koloru jako poświaty */
+  transform: scale(1.05);
 }
 .price-card.beta:hover {
-  transform: scale(1.1) translateY(-8px);
+  transform: scale(1.05) translateY(-8px);
 }
 .beta-badge {
   position: absolute;
   top: -14px; left: 50%; transform: translateX(-50%);
-  background: var(--accent); color: var(--btn-text);
+  background: var(--accent-beta); 
+  color: #fff; /* Biały tekst będzie lepiej widoczny na fioletowym */
   padding: 6px 18px; border-radius: 20px;
   font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px;
-  box-shadow: 0 0 15px var(--accent);
+  box-shadow: 0 0 15px var(--accent-beta);
 }
 
 .price-card h3 {
