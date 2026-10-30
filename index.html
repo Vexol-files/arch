@@ -6,272 +6,88 @@
 <title>Archnemesis — Premium Suite</title>
 <link rel="icon" type="image/png" href="logo.png">
 <style>
-:root{
-  --accent:#00e5ff;
-  --accent-hover:#00b8cc;
-  --radius:10px;
-  --transition:.3s ease;
-  --font:'Segoe UI', system-ui, sans-serif;
-}
-/* DARK THEME */
-[data-theme="dark"]{
-  --bg-overlay:rgba(2, 2, 3, 0.85);
-  --surface-tile-1:rgba(255, 255, 255, 0.03);
-  --surface-tile-2:rgba(0, 0, 0, 0.5);
-  --border:rgba(0, 229, 255, 0.15);
-  --border-hover:rgba(0, 229, 255, 0.6);
-  --text:#ffffff;
-  --text-dim:#8a93a6;
-  --glow:rgba(0, 229, 255, 0.25);
-  --nav-bg:rgba(2, 2, 3, 0.8);
-  --btn-text:#000;
-}
-/* LIGHT THEME */
-[data-theme="light"]{
-  --bg-overlay:rgba(244, 247, 249, 0.85);
-  --surface-tile-1:rgba(255, 255, 255, 0.8);
-  --surface-tile-2:rgba(0, 0, 0, 0.05);
-  --border:rgba(0, 0, 0, 0.1);
-  --border-hover:rgba(0, 153, 204, 0.5);
-  --text:#0f172a;
-  --text-dim:#64748b;
-  --glow:rgba(0, 153, 204, 0.25);
-  --nav-bg:rgba(244, 247, 249, 0.85);
-  --btn-text:#000;
-  --accent:#0099cc;
-  --accent-hover:#007aa3;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{
-  font-family:var(--font);
-  color:var(--text);
-  transition:color var(--transition);
-  min-height:100vh;overflow-x:hidden;
-  line-height:1.6;
-  background-image: 
-    linear-gradient(var(--bg-overlay), var(--bg-overlay)), 
-    url('wallpaper.png');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-color: #020203;
-}
-
-/* ---------- NAV ---------- */
-.nav{
-  position:sticky;top:0;z-index:100;
-  display:flex;justify-content:space-between;align-items:center;
-  padding:16px 40px;backdrop-filter:blur(20px);
-  background:var(--nav-bg);
-  border-bottom:1px solid var(--border);
-  transition:background var(--transition);
-}
+:root{--accent:#00e5ff;--accent-hover:#00b8cc;--radius:10px;--transition:.3s ease;--font:'Segoe UI',system-ui,sans-serif}
+[data-theme="dark"]{--bg-overlay:rgba(2,2,3,0.85);--surface-tile-1:rgba(255,255,255,0.03);--surface-tile-2:rgba(0,0,0,0.5);--border:rgba(0,229,255,0.15);--border-hover:rgba(0,229,255,0.6);--text:#fff;--text-dim:#8a93a6;--glow:rgba(0,229,255,0.25);--nav-bg:rgba(2,2,3,0.8);--btn-text:#000}
+[data-theme="light"]{--bg-overlay:rgba(244,247,249,0.85);--surface-tile-1:rgba(255,255,255,0.8);--surface-tile-2:rgba(0,0,0,0.05);--border:rgba(0,0,0,0.1);--border-hover:rgba(0,153,204,0.5);--text:#0f172a;--text-dim:#64748b;--glow:rgba(0,153,204,0.25);--nav-bg:rgba(244,247,249,0.85);--btn-text:#000;--accent:#0099cc;--accent-hover:#007aa3}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{font-family:var(--font);color:var(--text);transition:color var(--transition);min-height:100vh;overflow-x:hidden;line-height:1.6;background-image:linear-gradient(var(--bg-overlay),var(--bg-overlay)),url('wallpaper.png');background-size:cover;background-position:center;background-attachment:fixed;background-repeat:no-repeat;background-color:#020203}
+.nav{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:16px 40px;backdrop-filter:blur(20px);background:var(--nav-bg);border-bottom:1px solid var(--border)}
 .logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);font-weight:900;font-size:20px;letter-spacing:3px;text-transform:uppercase}
-.logo img{height:40px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px var(--glow));}
-
+.logo img{height:40px;width:auto;object-fit:contain;filter:drop-shadow(0 0 10px var(--glow))}
 .nav-actions{display:flex;align-items:center;gap:14px}
-.nav-btn{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:10px 22px;border-radius:6px;
-  font-size:13px;font-weight:700;text-decoration:none;
-  border:1px solid var(--border);background:rgba(0,0,0,0.2);
-  color:var(--text);cursor:pointer;letter-spacing:1px;text-transform:uppercase;
-  transition:all var(--transition);
-}
+.nav-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:6px;font-size:13px;font-weight:700;text-decoration:none;border:1px solid var(--border);background:rgba(0,0,0,0.2);color:var(--text);cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:all var(--transition)}
 .nav-btn:hover{transform:translateY(-2px);border-color:var(--border-hover);color:var(--accent);box-shadow:0 0 15px var(--glow)}
-.nav-btn.primary{
-  background:var(--accent);
-  color:var(--btn-text);border:1px solid var(--accent);box-shadow:0 0 15px var(--glow);
-}
+.nav-btn.primary{background:var(--accent);color:var(--btn-text);border:1px solid var(--accent);box-shadow:0 0 15px var(--glow)}
 .nav-btn.primary:hover{box-shadow:0 0 25px var(--accent);background:#fff;color:#000;border-color:#fff}
-.theme-toggle{
-  width:40px;height:40px;border-radius:6px;
-  background:rgba(0,0,0,0.2);border:1px solid var(--border);
-  color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;
-  transition:all var(--transition);
-}
+.theme-toggle{width:40px;height:40px;border-radius:6px;background:rgba(0,0,0,0.2);border:1px solid var(--border);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
 .theme-toggle:hover{border-color:var(--border-hover);color:var(--accent);box-shadow:0 0 10px var(--glow)}
 .theme-toggle svg{width:18px;height:18px}
 [data-theme="dark"] .sun-icon{display:block}[data-theme="dark"] .moon-icon{display:none}
 [data-theme="light"] .sun-icon{display:none}[data-theme="light"] .moon-icon{display:block}
-
-/* ---------- HERO ---------- */
-.hero{
-  position:relative;z-index:1;
-  display:flex;flex-direction:column;align-items:center;
-  text-align:center;padding:100px 24px 60px;
-}
-.hero-logo{margin-bottom:30px;animation:floatLogo 6s ease-in-out infinite;}
-.hero-logo img{width:140px;height:auto;filter:drop-shadow(0 0 30px var(--glow));}
+.hero{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:100px 24px 60px}
+.hero-logo{margin-bottom:30px;animation:floatLogo 6s ease-in-out infinite}
+.hero-logo img{width:140px;height:auto;filter:drop-shadow(0 0 30px var(--glow))}
 @keyframes floatLogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-
-.hero h1{
-  font-size:clamp(38px,6vw,72px);font-weight:900;
-  letter-spacing:-1px;line-height:1.1;margin-bottom:20px;
-  text-transform:uppercase;
-  text-shadow: 0 4px 20px rgba(0,0,0,0.5);
-}
-.hero h1 span{
-  color:var(--accent);
-  text-shadow:0 0 25px var(--glow);
-}
-.hero p{
-  font-size:clamp(15px,2vw,18px);color:var(--text-dim);
-  max-width:650px;margin-bottom:44px;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-}
+.hero h1{font-size:clamp(38px,6vw,72px);font-weight:900;letter-spacing:-1px;line-height:1.1;margin-bottom:20px;text-transform:uppercase;text-shadow:0 4px 20px rgba(0,0,0,0.5)}
+.hero h1 span{color:var(--accent);text-shadow:0 0 25px var(--glow)}
+.hero p{font-size:clamp(15px,2vw,18px);color:var(--text-dim);max-width:650px;margin-bottom:44px;text-shadow:0 2px 10px rgba(0,0,0,0.5)}
 .hero-actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-.cta{
-  display:inline-flex;align-items:center;gap:10px;
-  padding:16px 36px;border-radius:6px;
-  font-size:14px;font-weight:800;text-decoration:none;
-  transition:all var(--transition);text-transform:uppercase;letter-spacing:1.5px;
-}
-.cta-primary{
-  background:var(--accent);color:var(--btn-text);
-  box-shadow:0 0 20px var(--glow);border:1px solid var(--accent);
-}
-.cta-primary:hover{transform:scale(1.05);box-shadow:0 0 35px var(--accent);background:#fff;border-color:#fff;}
-.cta-secondary{
-  background:rgba(0,0,0,0.3);color:var(--text);border:1px solid var(--border);
-  backdrop-filter: blur(5px);
-}
+.cta{display:inline-flex;align-items:center;gap:10px;padding:16px 36px;border-radius:6px;font-size:14px;font-weight:800;text-decoration:none;transition:all var(--transition);text-transform:uppercase;letter-spacing:1.5px}
+.cta-primary{background:var(--accent);color:var(--btn-text);box-shadow:0 0 20px var(--glow);border:1px solid var(--accent)}
+.cta-primary:hover{transform:scale(1.05);box-shadow:0 0 35px var(--accent);background:#fff;border-color:#fff}
+.cta-secondary{background:rgba(0,0,0,0.3);color:var(--text);border:1px solid var(--border);backdrop-filter:blur(5px)}
 .cta-secondary:hover{transform:scale(1.05);border-color:var(--accent);color:var(--accent);box-shadow:0 0 15px var(--glow)}
-.cta svg, .nav-btn svg, footer a svg{width:18px;height:18px}
-
-/* ---------- SECTIONS ---------- */
+.cta svg,.nav-btn svg,footer a svg{width:18px;height:18px}
 .section{position:relative;z-index:1;padding:80px 24px;max-width:1200px;margin:0 auto}
 .section-head{text-align:center;margin-bottom:56px}
-.section-head h2{
-  font-size:clamp(28px,4vw,42px);font-weight:900;
-  letter-spacing:2px;margin-bottom:12px;text-transform:uppercase;
-}
-.section-head h2::after{
-  content:'';display:block;width:60px;height:3px;
-  background:var(--accent);margin:16px auto 0;border-radius:2px;
-  box-shadow:0 0 15px var(--accent);
-}
+.section-head h2{font-size:clamp(28px,4vw,42px);font-weight:900;letter-spacing:2px;margin-bottom:12px;text-transform:uppercase}
+.section-head h2::after{content:'';display:block;width:60px;height:3px;background:var(--accent);margin:16px auto 0;border-radius:2px;box-shadow:0 0 15px var(--accent)}
 .section-head p{color:var(--text-dim);font-size:16px;max-width:600px;margin:0 auto}
-
-/* ---------- TILES ---------- */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-  gap:20px;
-}
-.tile{
-  position:relative;padding:32px;
-  background: linear-gradient(135deg, var(--surface-tile-1) 0%, var(--surface-tile-2) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  transition:all var(--transition);overflow:hidden;
-}
-.tile::after{
-  content:'';position:absolute;top:0;left:0;width:100%;height:2px;
-  background:linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity:0;transition:opacity var(--transition);
-}
-.tile:hover{
-  transform:translateY(-5px);
-  border-color:var(--border-hover);
-  background: linear-gradient(135deg, var(--surface-tile-1) 10%, var(--surface-tile-2) 90%);
-  box-shadow:0 10px 40px rgba(0,0,0,0.6), 0 0 20px var(--glow);
-}
-.tile:hover::after{opacity:1;}
-.tile-icon{
-  width:52px;height:52px;border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  background:rgba(0,229,255,0.05);
-  border:1px solid rgba(0,229,255,0.2);margin-bottom:24px;
-  color:var(--accent);transition:all var(--transition);
-}
-.tile:hover .tile-icon{
-  background:var(--accent);color:var(--btn-text);
-  box-shadow:0 0 20px var(--accent);
-}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px}
+.tile{position:relative;padding:32px;background:linear-gradient(135deg,var(--surface-tile-1) 0%,var(--surface-tile-2) 100%);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--radius);transition:all var(--transition);overflow:hidden}
+.tile::after{content:'';position:absolute;top:0;left:0;width:100%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity var(--transition)}
+.tile:hover{transform:translateY(-5px);border-color:var(--border-hover);background:linear-gradient(135deg,var(--surface-tile-1) 10%,var(--surface-tile-2) 90%);box-shadow:0 10px 40px rgba(0,0,0,0.6),0 0 20px var(--glow)}
+.tile:hover::after{opacity:1}
+.tile-icon{width:52px;height:52px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.2);margin-bottom:24px;color:var(--accent);transition:all var(--transition)}
+.tile:hover .tile-icon{background:var(--accent);color:var(--btn-text);box-shadow:0 0 20px var(--accent)}
 .tile-icon svg{width:26px;height:26px}
 .tile h3{font-size:18px;font-weight:800;margin-bottom:12px;color:var(--text)}
 .tile p{font-size:14px;color:var(--text-dim);line-height:1.6}
-
 .tile.wide{grid-column:span 2}
 @media (max-width:700px){.tile.wide{grid-column:span 1}}
-
-/* ---------- FAQ ---------- */
 .faq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:16px}
-.faq{
-  padding:28px;
-  background: linear-gradient(135deg, var(--surface-tile-1) 0%, var(--surface-tile-2) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border:1px solid var(--border);
-  border-radius:var(--radius);transition:all var(--transition);
-}
+.faq{padding:28px;background:linear-gradient(135deg,var(--surface-tile-1) 0%,var(--surface-tile-2) 100%);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:var(--radius);transition:all var(--transition)}
 .faq:hover{border-color:var(--border-hover);box-shadow:0 0 20px var(--glow)}
 .faq h4{font-size:16px;font-weight:800;margin-bottom:10px;color:var(--accent);letter-spacing:.5px}
-.faq p{font-size:14px;color:var(--text-dim);}
-
-/* ---------- CTA BANNER ---------- */
-.cta-banner{
-  position:relative;z-index:1;
-  margin:60px auto;max-width:1100px;
-  padding:70px 40px;text-align:center;
-  background: radial-gradient(circle at center, var(--surface-tile-1) 0%, var(--surface-tile-2) 100%);
-  backdrop-filter: blur(15px);
-  border:1px solid var(--border);border-radius:var(--radius);
-  box-shadow:inset 0 0 40px rgba(0,229,255,0.05);
-}
+.faq p{font-size:14px;color:var(--text-dim)}
+.cta-banner{position:relative;z-index:1;margin:60px auto;max-width:1100px;padding:70px 40px;text-align:center;background:radial-gradient(circle at center,var(--surface-tile-1) 0%,var(--surface-tile-2) 100%);backdrop-filter:blur(15px);border:1px solid var(--border);border-radius:var(--radius);box-shadow:inset 0 0 40px rgba(0,229,255,0.05)}
 .cta-banner h2{font-size:clamp(28px,4vw,44px);font-weight:900;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px}
 .cta-banner p{color:var(--text-dim);margin-bottom:36px;font-size:16px}
-
-/* ---------- FOOTER ---------- */
-footer{
-  position:relative;z-index:1;padding:40px 24px;text-align:center;
-  border-top:1px solid var(--border);color:var(--text-dim);font-size:14px;
-  background:var(--nav-bg);
-  backdrop-filter: blur(10px);
-}
-footer a{
-  color:var(--accent);text-decoration:none;font-weight:700;
-  display:inline-flex;align-items:center;gap:5px;vertical-align:middle;
-}
+footer{position:relative;z-index:1;padding:40px 24px;text-align:center;border-top:1px solid var(--border);color:var(--text-dim);font-size:14px;background:var(--nav-bg);backdrop-filter:blur(10px)}
+footer a{color:var(--accent);text-decoration:none;font-weight:700;display:inline-flex;align-items:center;gap:5px;vertical-align:middle}
 footer a:hover{text-shadow:0 0 10px var(--accent)}
-footer a svg{width:16px;height:16px;}
-
-/* ---------- ANIMATIONS ---------- */
+footer a svg{width:16px;height:16px}
 .reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
 .reveal.visible{opacity:1;transform:translateY(0)}
-
-@media (max-width:640px){
-  .nav{padding:14px 18px}
-  .nav-btn span{display:none}
-  .hero{padding:80px 16px 40px}
-}
+@media (max-width:640px){.nav{padding:14px 18px}.nav-btn span{display:none}.hero{padding:80px 16px 40px}}
 </style>
 </head>
 <body>
 
-<!-- ========== NAV ========== -->
 <nav class="nav">
   <a href="index.html" class="logo">
     <img src="logo.png" alt="Archnemesis Logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
     <span style="display:none;">Archnemesis</span>
   </a>
   <div class="nav-actions">
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+    <button class="theme-toggle" id="themeToggle">
       <svg class="sun-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path stroke-linecap="round" d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
       <svg class="moon-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
     </button>
-    
-    <!-- PRICING BUTTON (NAV) -->
     <a href="pricing.html" class="nav-btn">
       <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
       <span>Pricing</span>
     </a>
-
     <a href="#" id="discordNav" class="nav-btn">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>
       <span>Discord</span>
@@ -283,139 +99,94 @@ footer a svg{width:16px;height:16px;}
   </div>
 </nav>
 
-<!-- ========== HERO ========== -->
 <section class="hero">
-  <div class="hero-logo">
-    <img src="logo.png" alt="Archnemesis" onerror="this.style.display='none'">
-  </div>
+  <div class="hero-logo"><img src="logo.png" alt="Archnemesis" onerror="this.style.display='none'"></div>
   <h1>Dominate with <span>Archnemesis</span></h1>
   <p>An advanced cheat suite wrapped in a dark aesthetic. Undetectable ESP, Silent Aim, and full customization. Engineered for those who refuse to compromise.</p>
   <div class="hero-actions">
-    <a href="#" id="discordHero" class="cta cta-primary">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>
-      Join Discord
-    </a>
+    <a href="#" id="discordHero" class="cta cta-primary"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>Join Discord</a>
     <a href="pricing.html" class="cta cta-secondary">View Pricing</a>
     <a href="#" id="loginHero" class="cta cta-secondary">Client Login</a>
   </div>
 </section>
 
-<!-- ========== FEATURES ========== -->
 <section class="section">
-  <div class="section-head reveal">
-    <h2>Dark Power</h2>
-    <p>Everything you need to completely dominate the game.</p>
-  </div>
+  <div class="section-head reveal"><h2>Dark Power</h2><p>Everything you need to completely dominate the game.</p></div>
   <div class="grid" id="featuresGrid"></div>
 </section>
 
-<!-- ========== SUPPORT ========== -->
 <section class="section">
-  <div class="section-head reveal">
-    <h2>Reliability & Security</h2>
-    <p>Your peace of mind is our top priority.</p>
-  </div>
+  <div class="section-head reveal"><h2>Reliability & Security</h2><p>Your peace of mind is our top priority.</p></div>
   <div class="grid" id="infoGrid"></div>
 </section>
 
-<!-- ========== FAQ ========== -->
 <section class="section">
-  <div class="section-head reveal">
-    <h2>FAQ</h2>
-    <p>Frequently asked questions.</p>
-  </div>
+  <div class="section-head reveal"><h2>FAQ</h2><p>Frequently asked questions.</p></div>
   <div class="faq-grid" id="faqGrid"></div>
 </section>
 
-<!-- ========== CTA BANNER ========== -->
 <div class="cta-banner reveal">
   <h2>Ready for Vengeance?</h2>
   <p>Join thousands of players and unlock your full potential today.</p>
   <div class="hero-actions">
-    <a href="#" id="discordCta" class="cta cta-primary">
-      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>
-      Join Discord
-    </a>
+    <a href="#" id="discordCta" class="cta cta-primary"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>Join Discord</a>
     <a href="pricing.html" class="cta cta-secondary">Get Started</a>
   </div>
 </div>
 
-<!-- ========== FOOTER ========== -->
 <footer>
   © 2024 <strong>Archnemesis</strong> — All rights reserved · 
   <a href="pricing.html">Pricing</a> · 
-  <a href="#" id="discordFooter">
-    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>
-    Discord
-  </a> · 
+  <a href="#" id="discordFooter"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.3 4.4A19.8 19.8 0 0015.4 3l-.2.5c1.5.4 2.3.9 3.4 1.6a17.3 17.3 0 00-13.2 0C6.5 4.4 7.3 3.9 8.8 3.5L8.6 3a19.8 19.8 0 00-4.9 1.4A20.3 20.3 0 000 18.4a19.9 19.9 0 006.1 3.1l1-1.7c-1.2-.5-2.2-1-3.1-1.7l.7-.6a14.2 14.2 0 0012.6 0l.7.6c-.9.7-1.9 1.2-3.1 1.7l1 1.7A19.9 19.9 0 0024 18.4a20.3 20.3 0 00-3.7-14zM8.3 15.6c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9zm7.4 0c-1 0-1.7-.9-1.7-1.9s.8-1.9 1.7-1.9 1.7.9 1.7 1.9-.7 1.9-1.7 1.9z"/></svg>Discord</a> · 
   <a href="#" id="loginFooter">Login</a>
 </footer>
 
 <script>
-/* =========================================================
-   CONFIG — YOUR LINKS HERE
-   ========================================================= */
-const CONFIG = {
-  DISCORD_URL: 'https://discord.gg/S3PJ37MfPG',
-  LOGIN_URL:   'https://your-panel.com/login' // <--- ZMIEŃ NA SWÓJ LINK DO LOGOWANIA
-};
+const CONFIG={DISCORD_URL:'https://discord.gg/S3PJ37MfPG',LOGIN_URL:'https://your-panel.com/login'};
+['discordNav','discordHero','discordCta','discordFooter'].forEach(id=>{const el=document.getElementById(id);if(el){el.href=CONFIG.DISCORD_URL;el.target='_blank';}});
+['loginNav','loginHero','loginFooter'].forEach(id=>{const el=document.getElementById(id);if(el)el.href=CONFIG.LOGIN_URL;});
 
-['discordNav','discordHero','discordCta','discordFooter'].forEach(id => {
-  document.getElementById(id).href = CONFIG.DISCORD_URL;
-  document.getElementById(id).target = '_blank';
-});
-['loginNav','loginHero','loginFooter'].forEach(id => {
-  document.getElementById(id).href = CONFIG.LOGIN_URL;
+const root=document.documentElement;
+root.setAttribute('data-theme',localStorage.getItem('arch-theme')||'dark');
+document.getElementById('themeToggle').addEventListener('click',()=>{
+  const next=root.getAttribute('data-theme')==='dark'?'light':'dark';
+  root.setAttribute('data-theme',next);
+  localStorage.setItem('arch-theme',next);
 });
 
-/* =========================================================
-   THEME
-   ========================================================= */
-const root = document.documentElement;
-root.setAttribute('data-theme', localStorage.getItem('arch-theme') || 'dark');
-document.getElementById('themeToggle').addEventListener('click', () => {
-  const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  root.setAttribute('data-theme', next);
-  localStorage.setItem('arch-theme', next);
-});
-
-/* =========================================================
-   TILE DATA
-   ========================================================= */
-const features = [
-  { icon:'eye',    title:'Advanced ESP',        desc:'Boxes, skeletons, health bars, and distance. Full control over what you see.' },
-  { icon:'cross',  title:'Silent Aim',          desc:'Humanized aimbot with FOV, smoothness, and hitbox selection options.' },
-  { icon:'bolt',   title:'Speed Hack',          desc:'Speed adjustment with auto-reset to remain undetected.' },
-  { icon:'shield', title:'Anti-Cheat Bypass',   desc:'Kernel-level protection bypass, updated daily to keep you safe.' },
-  { icon:'radar',  title:'Radar Hack',          desc:'Full minimap overlay showing enemies, loot, and vehicles in real-time.' },
-  { icon:'gear',   title:'Config System',       desc:'Save, load, and share unlimited configs. Import directly from Discord.' },
-  { icon:'cursor', title:'Triggerbot',          desc:'Custom delays, hitbox priority, and smart firing for perfect timing.' },
-  { icon:'sparkle',title:'Skin Changer',        desc:'Unlock every weapon skin, knife, and glove visible to other players.' },
-  { icon:'lock',   title:'HWID Spoofer',        desc:'Permanent hardware masking. Reset your HWID without formatting Windows.' },
-  { icon:'cloud',  title:'Cloud Sync',          desc:'Synchronize your configs and stats across all your devices seamlessly.' },
-  { icon:'bolt2',  title:'Low Latency',         desc:'Optimized rendering – zero FPS drops, overlay updates in under a millisecond.' },
-  { icon:'user',   title:'24/7 Support',        desc:'Live support on Discord. Average response time under 10 minutes.' }
+const features=[
+  {icon:'eye',title:'Advanced ESP',desc:'Boxes, skeletons, health bars, and distance. Full control over what you see.'},
+  {icon:'cross',title:'Silent Aim',desc:'Humanized aimbot with FOV, smoothness, and hitbox selection options.'},
+  {icon:'bolt',title:'Speed Hack',desc:'Speed adjustment with auto-reset to remain undetected.'},
+  {icon:'shield',title:'Anti-Cheat Bypass',desc:'Kernel-level protection bypass, updated daily to keep you safe.'},
+  {icon:'radar',title:'Radar Hack',desc:'Full minimap overlay showing enemies, loot, and vehicles in real-time.'},
+  {icon:'gear',title:'Config System',desc:'Save, load, and share unlimited configs. Import directly from Discord.'},
+  {icon:'cursor',title:'Triggerbot',desc:'Custom delays, hitbox priority, and smart firing for perfect timing.'},
+  {icon:'sparkle',title:'Skin Changer',desc:'Unlock every weapon skin, knife, and glove visible to other players.'},
+  {icon:'lock',title:'HWID Spoofer',desc:'Permanent hardware masking. Reset your HWID without formatting Windows.'},
+  {icon:'cloud',title:'Cloud Sync',desc:'Synchronize your configs and stats across all your devices seamlessly.'},
+  {icon:'bolt2',title:'Low Latency',desc:'Optimized rendering – zero FPS drops, overlay updates in under a millisecond.'},
+  {icon:'user',title:'24/7 Support',desc:'Live support on Discord. Average response time under 10 minutes.'}
 ];
 
-const infoTiles = [
-  { icon:'shield', title:'Undetected', desc:'Our team updates bypasses within hours of a detection wave. Your account is safe.', wide:true, accent:true },
-  { icon:'bolt',   title:'Instant Delivery', desc:'Receive your license the moment you pay. No waiting.' },
-  { icon:'gear',   title:'Easy Setup', desc:'One-click loader, no config files needed. Ready in 60 seconds.' },
-  { icon:'cloud',  title:'Regular Updates', desc:'Weekly new features and daily security patches.' },
-  { icon:'lock',   title:'Secure Payments', desc:'Cryptocurrency, PayPal, card. Full encryption and zero logs.' },
+const infoTiles=[
+  {icon:'shield',title:'Undetected',desc:'Our team updates bypasses within hours of a detection wave. Your account is safe.',wide:true,accent:true},
+  {icon:'bolt',title:'Instant Delivery',desc:'Receive your license the moment you pay. No waiting.'},
+  {icon:'gear',title:'Easy Setup',desc:'One-click loader, no config files needed. Ready in 60 seconds.'},
+  {icon:'cloud',title:'Regular Updates',desc:'Weekly new features and daily security patches.'},
+  {icon:'lock',title:'Secure Payments',desc:'Cryptocurrency, PayPal, card. Full encryption and zero logs.'}
 ];
 
-const faqs = [
-  { q:'Is Archnemesis detected?', a:'No. We release updates within hours of detection. Every user with an active license is automatically protected.' },
-  { q:'What payment methods are available?', a:'Cryptocurrency (BTC, ETH, LTC, USDT), PayPal, and credit cards. Everything is encrypted.' },
-  { q:'How long does delivery take?', a:'Instantly. Your license key appears in the dashboard right after payment confirmation.' },
-  { q:'Do I need special hardware?', a:'No. Archnemesis runs on any modern Windows 10/11 PC. Performance impact is under 1%.' },
-  { q:'Can I get a refund?', a:'Yes, within 24 hours of purchase if the product does not work as described. Contact us on Discord.' },
-  { q:'Is there a trial version?', a:'Yes — a 24-hour trial is available for new users. Claim it on our Discord server.' },
+const faqs=[
+  {q:'Is Archnemesis detected?',a:'No. We release updates within hours of detection. Every user with an active license is automatically protected.'},
+  {q:'What payment methods are available?',a:'Cryptocurrency (BTC, ETH, LTC, USDT), PayPal, and credit cards. Everything is encrypted.'},
+  {q:'How long does delivery take?',a:'Instantly. Your license key appears in the dashboard right after payment confirmation.'},
+  {q:'Do I need special hardware?',a:'No. Archnemesis runs on any modern Windows 10/11 PC. Performance impact is under 1%.'},
+  {q:'Can I get a refund?',a:'Yes, within 24 hours of purchase if the product does not work as described. Contact us on Discord.'},
+  {q:'Is there a trial version?',a:'Yes — a 24-hour trial is available for new users. Claim it on our Discord server.'}
 ];
 
-/* ---------- SVG ICONS ---------- */
-const ICONS = {
+const ICONS={
   eye:'<path stroke-linecap="round" stroke-linejoin="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>',
   cross:'<circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 3v4M12 17v4M3 12h4M17 12h4"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/>',
   bolt:'<path stroke-linecap="round" stroke-linejoin="round" d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/>',
@@ -425,46 +196,19 @@ const ICONS = {
   gear:'<circle cx="12" cy="12" r="3"/><path stroke-linecap="round" d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>',
   cursor:'<path stroke-linecap="round" stroke-linejoin="round" d="M3 3l7 18 3-7 7-3-17-8z"/>',
   sparkle:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2z"/>',
-  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path stroke-linecap="round" d="M8 11V7a4 4 0 018 
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path stroke-linecap="round" d="M8 11V7a4 4 0 018 0v4"/>',
   cloud:'<path stroke-linecap="round" stroke-linejoin="round" d="M18 18a4 4 0 000-8 6 6 0 00-11.7-1.5A4 4 0 006 18h12z"/>',
   user:'<circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 22a8 8 0 0116 0"/>'
 };
 
-function iconSVG(name){
-  return `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONS[name]||ICONS.sparkle}</svg>`;
-}
+const iconSVG=n=>`<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONS[n]||ICONS.sparkle}</svg>`;
 
-/* ---------- RENDERING ---------- */
-document.getElementById('featuresGrid').innerHTML = features.map(f => `
-  <div class="tile reveal">
-    <div class="tile-icon">${iconSVG(f.icon)}</div>
-    <h3>${f.title}</h3>
-    <p>${f.desc}</p>
-  </div>
-`).join('');
+document.getElementById('featuresGrid').innerHTML=features.map(f=>`<div class="tile reveal"><div class="tile-icon">${iconSVG(f.icon)}</div><h3>${f.title}</h3><p>${f.desc}</p></div>`).join('');
+document.getElementById('infoGrid').innerHTML=infoTiles.map(t=>`<div class="tile reveal ${t.wide?'wide':''} ${t.accent?'tile-accent':''}"><div class="tile-icon">${iconSVG(t.icon)}</div><h3>${t.title}</h3><p>${t.desc}</p></div>`).join('');
+document.getElementById('faqGrid').innerHTML=faqs.map(f=>`<div class="faq reveal"><h4>${f.q}</h4><p>${f.a}</p></div>`).join('');
 
-document.getElementById('infoGrid').innerHTML = infoTiles.map(t => `
-  <div class="tile reveal ${t.wide?'wide':''} ${t.accent?'tile-accent':''}">
-    <div class="tile-icon">${iconSVG(t.icon)}</div>
-    <h3>${t.title}</h3>
-    <p>${t.desc}</p>
-  </div>
-`).join('');
-
-document.getElementById('faqGrid').innerHTML = faqs.map(f => `
-  <div class="faq reveal"><h4>${f.q}</h4><p>${f.a}</p></div>
-`).join('');
-
-/* ---------- SCROLL REVEAL ---------- */
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.classList.add('visible');
-      io.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.1 });
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+const io=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');io.unobserve(e.target);}})},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 </script>
 </body>
 </html>
