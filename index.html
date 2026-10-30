@@ -426,3 +426,66 @@ const ICONS = {
   cursor:'<path stroke-linecap="round" stroke-linejoin="round" d="M3 3l7 18 3-7 7-3-17-8z"/>',
   sparkle:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2z"/>',
   lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path stroke-linecap="round" d="M8 11V7a4 4 0 018 
+  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path stroke-linecap="round" d="M8 11V7a4 4 0 018 0v4"/>',
+  cloud:'<path stroke-linecap="round" stroke-linejoin="round" d="M18 10a4 4 0 00-7.8-1.2A5 5 0 106 18h12a4 4 0 000-8z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 21v-2a6 6 0 016-6h4a6 6 0 016 6v2"/>'
+};
+
+/* ---------- RENDER HELPERS ---------- */
+function makeIcon(name){
+  const path = ICONS[name] || ICONS.gear;
+  return `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${path}</svg>`;
+}
+
+function renderFeatures(){
+  const grid = document.getElementById('featuresGrid');
+  grid.innerHTML = features.map(f => `
+    <article class="tile reveal">
+      <div class="tile-icon">${makeIcon(f.icon)}</div>
+      <h3>${f.title}</h3>
+      <p>${f.desc}</p>
+    </article>
+  `).join('');
+}
+
+function renderInfo(){
+  const grid = document.getElementById('infoGrid');
+  grid.innerHTML = infoTiles.map(t => `
+    <article class="tile reveal${t.wide ? ' wide' : ''}">
+      <div class="tile-icon">${makeIcon(t.icon)}</div>
+      <h3>${t.title}</h3>
+      <p>${t.desc}</p>
+    </article>
+  `).join('');
+}
+
+function renderFaq(){
+  const grid = document.getElementById('faqGrid');
+  grid.innerHTML = faqs.map(f => `
+    <article class="faq reveal">
+      <h4>${f.q}</h4>
+      <p>${f.a}</p>
+    </article>
+  `).join('');
+}
+
+renderFeatures();
+renderInfo();
+renderFaq();
+
+/* =========================================================
+   SCROLL REVEAL
+   ========================================================= */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting){
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
