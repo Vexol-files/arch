@@ -426,66 +426,45 @@ const ICONS = {
   cursor:'<path stroke-linecap="round" stroke-linejoin="round" d="M3 3l7 18 3-7 7-3-17-8z"/>',
   sparkle:'<path stroke-linecap="round" stroke-linejoin="round" d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5L12 2z"/>',
   lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path stroke-linecap="round" d="M8 11V7a4 4 0 018 
-  lock:'<rect x="4" y="11" width="16" height="10" rx="2"/><path stroke-linecap="round" d="M8 11V7a4 4 0 018 0v4"/>',
-  cloud:'<path stroke-linecap="round" stroke-linejoin="round" d="M18 10a4 4 0 00-7.8-1.2A5 5 0 106 18h12a4 4 0 000-8z"/>',
-  user:'<circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 21v-2a6 6 0 016-6h4a6 6 0 016 6v2"/>'
+    cloud:'<path stroke-linecap="round" stroke-linejoin="round" d="M18 18a4 4 0 000-8 6 6 0 00-11.7-1.5A4 4 0 006 18h12z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path stroke-linecap="round" d="M4 22a8 8 0 0116 0"/>'
 };
 
-/* ---------- RENDER HELPERS ---------- */
-function makeIcon(name){
-  const path = ICONS[name] || ICONS.gear;
-  return `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${path}</svg>`;
+function iconSVG(name){
+  return `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${ICONS[name]||ICONS.sparkle}</svg>`;
 }
 
-function renderFeatures(){
-  const grid = document.getElementById('featuresGrid');
-  grid.innerHTML = features.map(f => `
-    <article class="tile reveal">
-      <div class="tile-icon">${makeIcon(f.icon)}</div>
-      <h3>${f.title}</h3>
-      <p>${f.desc}</p>
-    </article>
-  `).join('');
-}
+/* ---------- RENDERING ---------- */
+document.getElementById('featuresGrid').innerHTML = features.map(f => `
+  <div class="tile reveal">
+    <div class="tile-icon">${iconSVG(f.icon)}</div>
+    <h3>${f.title}</h3>
+    <p>${f.desc}</p>
+  </div>
+`).join('');
 
-function renderInfo(){
-  const grid = document.getElementById('infoGrid');
-  grid.innerHTML = infoTiles.map(t => `
-    <article class="tile reveal${t.wide ? ' wide' : ''}">
-      <div class="tile-icon">${makeIcon(t.icon)}</div>
-      <h3>${t.title}</h3>
-      <p>${t.desc}</p>
-    </article>
-  `).join('');
-}
+document.getElementById('infoGrid').innerHTML = infoTiles.map(t => `
+  <div class="tile reveal ${t.wide?'wide':''} ${t.accent?'tile-accent':''}">
+    <div class="tile-icon">${iconSVG(t.icon)}</div>
+    <h3>${t.title}</h3>
+    <p>${t.desc}</p>
+  </div>
+`).join('');
 
-function renderFaq(){
-  const grid = document.getElementById('faqGrid');
-  grid.innerHTML = faqs.map(f => `
-    <article class="faq reveal">
-      <h4>${f.q}</h4>
-      <p>${f.a}</p>
-    </article>
-  `).join('');
-}
+document.getElementById('faqGrid').innerHTML = faqs.map(f => `
+  <div class="faq reveal"><h4>${f.q}</h4><p>${f.a}</p></div>
+`).join('');
 
-renderFeatures();
-renderInfo();
-renderFaq();
-
-/* =========================================================
-   SCROLL REVEAL
-   ========================================================= */
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting){
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
+/* ---------- SCROLL REVEAL ---------- */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      io.unobserve(e.target);
     }
   });
-}, { threshold: 0.12 });
-
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 </script>
 </body>
 </html>
