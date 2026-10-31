@@ -12,14 +12,11 @@ export default async function handler(req, res) {
     const BOT_TOKEN = process.env.BOT_TOKEN;
     const GUILD_ID = process.env.GUILD_ID;
     const REDIRECT_URI = 'https://projectarch.vercel.app/api/discord/callback';
-
-    // Pełny adres URL do panelu.html (zamiast relatywnego)
     const PANEL_URL = 'https://projectarch.vercel.app/panel.html';
-    // Pełny adres URL do strony logowania (na wypadek błędu)
     const LOGIN_URL = 'https://projectarch.vercel.app/login.html';
 
     try {
-        // 2. Wymieniamy kod na token dostępu
+        // 1. Wymieniamy kod na token dostępu
         const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -41,17 +38,15 @@ export default async function handler(req, res) {
         const tokenData = await tokenResponse.json();
         const accessToken = tokenData.access_token;
 
-        // 3. Pobieramy dane użytkownika
+        // 2. Pobieramy dane użytkownika (ID, nazwa, email, avatar)
         const userResponse = await fetch('https://discord.com/api/users/@me', {
             headers: { Authorization: `Bearer ${accessToken}` }
         });
         
-        if (!userResponse.ok) {
-            throw new Error('Błąd pobierania danych użytkownika');
-        }
+        if (!userResponse.ok) throw new Error('Błąd pobierania danych użytkownika');
         const user = await userResponse.json();
 
-        // 4. Pobieramy informacje o rolach
+        // 3. Pobieramy informacje o rolach użytkownika
         let userRoles = [];
         try {
             const memberResponse = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/members/${user.id}`, {
@@ -66,10 +61,13 @@ export default async function handler(req, res) {
                 });
                 const allRoles = await rolesResponse.json();
 
+                // Filtrujemy role użytkownika, sortujemy od najwyższej
+                // DODANO: id roli, aby panel mógł sprawdzić uprawnienia
                 userRoles = allRoles
                     .filter(role => member.roles.includes(role.id) && role.name !== '@everyone')
                     .sort((a, b) => b.position - a.position)
                     .map(role => ({
+                        id: role.id,        // <-- Kluczowe dla panelu admina!
                         name: role.name,
                         color: role.color
                     }));
@@ -80,27 +78,26 @@ export default async function handler(req, res) {
             console.error('Błąd pobierania ról:', roleError);
         }
 
-        // 5. Przygotowujemy dane
+        // 4. Przygotowujemy dane do przekazania
         const profileData = {
             id: user.id,
             username: user.username,
             globalName: user.global_name || user.username,
             email: user.email || 'Brak dostępu do e-maila',
             avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : null,
-            createdAt: new Date(user.id / 4194304 + 1420070400000).toLocaleDateString('pl-PL'),
+            createdAt: new Date(user.id / 4194304 + 1420070400000).toLocaleDateString('en-US'), // Zmieniono na EN
             guildId: GUILD_ID,
             roles: userRoles
         };
 
-        // 6. Kodujemy dane w Base64
+        // 5. Kodujemy dane w Base64
         const encodedData = Buffer.from(JSON.stringify(profileData)).toString('base64');
 
-        // 7. Przekierowujemy na PEŁNY adres panel.html
+        // 6. Przekierowujemy na panel.html
         return res.redirect(302, `${PANEL_URL}?data=${encodedData}`);
 
     } catch (error) {
         console.error('Błąd logowania Discord:', error.message);
-        // Przekierowanie na login z informacją o błędzie
         return res.redirect(302, `${LOGIN_URL}?error=auth_failed`);
     }
 }
