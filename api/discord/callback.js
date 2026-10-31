@@ -2,22 +2,20 @@
 
 export default async function handler(req, res) {
     const { code } = req.query;
-
-    if (!code) {
-        return res.status(400).send('Brak kodu autoryzacji z Discorda.');
-    }
+    if (!code) return res.status(400).send('Brak kodu autoryzacji.');
 
     const CLIENT_ID = process.env.CLIENT_ID;
     const CLIENT_SECRET = process.env.CLIENT_SECRET;
     const BOT_TOKEN = process.env.BOT_TOKEN;
     const GUILD_ID = process.env.GUILD_ID;
+    const ADMIN_ROLE = process.env.ADMIN_ROLE; // <-- Zmienione na ADMIN_ROLE
     const REDIRECT_URI = 'https://projectarch.vercel.app/api/discord/callback';
     const PANEL_URL = 'https://projectarch.vercel.app/panel.html';
     const LOGIN_URL = 'https://projectarch.vercel.app/login.html';
 
     try {
         // 1. Wymieniamy kod na token dostępu
-        const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+        const tokenRes = await fetch('https://discord.com/api/oauth2/token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
@@ -28,76 +26,75 @@ export default async function handler(req, res) {
                 redirect_uri: REDIRECT_URI
             })
         });
+        if (!tokenRes.ok) throw new Error('Token exchange failed');
+        const tokenData = await tokenRes.json();
 
-        if (!tokenResponse.ok) {
-            const errorText = await tokenResponse.text();
-            console.error('Błąd tokenu:', errorText);
-            throw new Error(`Błąd wymiany kodu na token: ${errorText}`);
-        }
-        
-        const tokenData = await tokenResponse.json();
-        const accessToken = tokenData.access_token;
-
-        // 2. Pobieramy dane użytkownika (ID, nazwa, email, avatar)
-        const userResponse = await fetch('https://discord.com/api/users/@me', {
-            headers: { Authorization: `Bearer ${accessToken}` }
+        // 2. Pobieramy dane użytkownika
+        const userRes = await fetch('https://discord.com/api/users/@me', {
+            headers: { Authorization: `Bearer ${tokenData.access_token}` }
         });
-        
-        if (!userResponse.ok) throw new Error('Błąd pobierania danych użytkownika');
-        const user = await userResponse.json();
+        if (!userRes.ok) throw new Error('User fetch failed');
+        const user = await userRes.json();
 
-        // 3. Pobieramy informacje o rolach użytkownika
+        // 3. Pobieramy role użytkownika
         let userRoles = [];
+        let isAdmin = false;
         try {
-            const memberResponse = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/members/${user.id}`, {
+            const memberRes = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/members/${user.id}`, {
                 headers: { Authorization: `Bot ${BOT_TOKEN}` }
             });
-            
-            if (memberResponse.ok) {
-                const member = await memberResponse.json();
-                
-                const rolesResponse = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/roles`, {
+            if (memberRes.ok) {
+                const member = await memberRes.json();
+                const rolesRes = await fetch(`https://discord.com/api/guilds/${GUILD_ID}/roles`, {
                     headers: { Authorization: `Bot ${BOT_TOKEN}` }
                 });
-                const allRoles = await rolesResponse.json();
-
-                // Filtrujemy role użytkownika, sortujemy od najwyższej
-                // DODANO: id roli, aby panel mógł sprawdzić uprawnienia
+                const allRoles = await rolesRes.json();
                 userRoles = allRoles
-                    .filter(role => member.roles.includes(role.id) && role.name !== '@everyone')
+                    .filter(r => member.roles.includes(r.id) && r.name !== '@everyone')
                     .sort((a, b) => b.position - a.position)
-                    .map(role => ({
-                        id: role.id,        // <-- Kluczowe dla panelu admina!
-                        name: role.name,
-                        color: role.color
-                    }));
-            } else {
-                console.warn(`Użytkownik ${user.id} nie jest na serwerze lub bot nie ma uprawnień.`);
+                    .map(r => ({ id: r.id, name: r.name, color: r.color }));
+                
+                // Sprawdzamy, czy użytkownik ma rolę ADMIN_ROLE (po ID)
+                isAdmin = userRoles.some(r => r.id === ADMIN_ROLE);
             }
-        } catch (roleError) {
-            console.error('Błąd pobierania ról:', roleError);
+        } catch (e) {
+            console.error('Role error:', e);
         }
 
-        // 4. Przygotowujemy dane do przekazania
+        // 4. Przygotowanie danych do cookie (userId + isAdmin)
+        const sessionData = {
+            userId: user.id,
+            isAdmin: isAdmin
+        };
+        
+        // Podpisujemy cookie za pomocą wbudowanego crypto i CLIENT_SECRET
+        const crypto = await import('crypto');
+        const secret = process.env.CLIENT_SECRET;
+        
+        const payload = Buffer.from(JSON.stringify(sessionData)).toString('base64url');
+        const signature = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+        const cookieValue = `${payload}.${signature}`;
+
+        // 5. Ustawiamy bezpieczne ciasteczko
+        res.setHeader('Set-Cookie', `arch_session=${cookieValue}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=7200`);
+
+        // 6. Przekierowujemy na panel.html z danymi profilu
         const profileData = {
             id: user.id,
-            username: user.username,
             globalName: user.global_name || user.username,
-            email: user.email || 'Brak dostępu do e-maila',
+            email: user.email,
             avatar: user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : null,
-            createdAt: new Date(user.id / 4194304 + 1420070400000).toLocaleDateString('en-US'), // Zmieniono na EN
+            createdAt: new Date(user.id / 4194304 + 1420070400000).toLocaleDateString('en-US'),
             guildId: GUILD_ID,
-            roles: userRoles
+            roles: userRoles,
+            isAdmin: isAdmin
         };
-
-        // 5. Kodujemy dane w Base64
         const encodedData = Buffer.from(JSON.stringify(profileData)).toString('base64');
-
-        // 6. Przekierowujemy na panel.html
+        
         return res.redirect(302, `${PANEL_URL}?data=${encodedData}`);
 
     } catch (error) {
-        console.error('Błąd logowania Discord:', error.message);
+        console.error('Login error:', error);
         return res.redirect(302, `${LOGIN_URL}?error=auth_failed`);
     }
 }
