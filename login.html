@@ -1,205 +1,31 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Content Unavailable — Archnemesis</title>
-<link rel="icon" type="image/png" href="logo.png">
-<style>
-:root{
-  --accent:#00e5ff;
-  --accent-2:#a855f7;
-  --transition:.4s cubic-bezier(.4,0,.2,1);
-  --font:'Segoe UI', system-ui, sans-serif;
-}
-[data-theme="dark"]{
-  --bg:#020203;
-  --surface:rgba(10, 12, 18, 0.6);
-  --border:rgba(255, 255, 255, 0.05);
-  --text:#ffffff;
-  --text-dim:#8a93a6;
-  --glow:rgba(0, 229, 255, 0.25);
-}
-[data-theme="light"]{
-  --bg:#f4f7f9;
-  --surface:rgba(255, 255, 255, 0.7);
-  --border:rgba(0, 0, 0, 0.08);
-  --text:#0f172a;
-  --text-dim:#64748b;
-  --glow:rgba(0, 153, 204, 0.2);
-  --accent:#0099cc;
-}
-
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  font-family:var(--font);
-  background-color:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-  position:relative;
-  transition:background var(--transition), color var(--transition);
-}
-
-/* Animowane plamy w tle */
-body::before, body::after {
-  content:'';
-  position:absolute;
-  border-radius:50%;
-  filter:blur(150px);
-  z-index:0;
-  opacity:0.4;
-  pointer-events:none;
-  animation:float 10s ease-in-out infinite;
-}
-body::before {
-  width:500px; height:500px;
-  background:var(--accent);
-  top:-100px; left:-100px;
-}
-body::after {
-  width:600px; height:600px;
-  background:var(--accent-2);
-  bottom:-200px; right:-100px;
-  animation-delay:-5s;
-}
-@keyframes float {
-  0%,100%{transform:translate(0,0)}
-  50%{transform:translate(40px,40px)}
-}
-
-/* Główny kafelek */
-.error-card {
-  position:relative;
-  z-index:1;
-  width:100%;
-  max-width:480px;
-  padding:50px 40px;
-  background:var(--surface);
-  border:1px solid var(--border);
-  border-radius:20px;
-  backdrop-filter:blur(20px);
-  -webkit-backdrop-filter:blur(20px);
-  text-align:center;
-  box-shadow:0 20px 60px rgba(0,0,0,0.4), inset 0 0 30px rgba(255,255,255,0.02);
-  animation:cardIn 0.8s cubic-bezier(.2,.8,.2,1);
-}
-@keyframes cardIn {
-  from{opacity:0; transform:translateY(30px) scale(0.95)}
-  to{opacity:1; transform:translateY(0) scale(1)}
-}
-
-/* Ikona/Logo na górze */
-.icon-wrapper {
-  width:80px; height:80px;
-  margin:0 auto 24px;
-  display:flex; align-items:center; justify-content:center;
-  background:rgba(0,229,255,0.1);
-  border-radius:50%;
-  border:1px solid var(--accent);
-  box-shadow:0 0 30px var(--glow);
-}
-.icon-wrapper svg {
-  width:40px; height:40px;
-  color:var(--accent);
-}
-
-/* Tekst */
-.error-card h1 {
-  font-size:26px;
-  font-weight:800;
-  letter-spacing:-0.5px;
-  margin-bottom:16px;
-  text-transform:uppercase;
-  color:var(--text);
-}
-.error-card p {
-  font-size:15px;
-  color:var(--text-dim);
-  line-height:1.6;
-  margin-bottom:32px;
-}
-.error-card p span {
-  color:var(--accent);
-  font-weight:600;
-}
-
-/* Przycisk */
-.btn-retry {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  width:100%;
-  padding:16px 24px;
-  background:var(--accent);
-  color:#000;
-  font-size:14px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  text-decoration:none;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-  transition:all var(--transition);
-  box-shadow:0 0 20px var(--glow);
-}
-.btn-retry:hover {
-  transform:translateY(-2px);
-  box-shadow:0 8px 30px var(--glow);
-  background:#fff;
-}
-.btn-retry:active {
-  transform:translateY(0);
-}
-.btn-retry svg {
-  width:16px; height:16px;
-}
-
-/* Mały napis na dole */
-.footer-note {
-  position:absolute;
-  bottom:24px;
-  z-index:1;
-  font-size:12px;
-  color:var(--text-dim);
-  letter-spacing:1px;
-  text-transform:uppercase;
-  opacity:0.6;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting to Discord...</title>
+    <style>
+        body { background: #020203; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        .loader { border: 4px solid #1a1a1a; border-top: 4px solid #00e5ff; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
 <body>
+    <div style="text-align: center;">
+        <div class="loader" style="margin: 0 auto 20px;"></div>
+        <p>Redirecting to Discord...</p>
+    </div>
 
-<div class="error-card">
-  <!-- Ikona Ostrzeżenia / Kłódki -->
-  <div class="icon-wrapper">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-    </svg>
-  </div>
+    <script>
+        // KONFIGURACJA
+        const CLIENT_ID = 'TWOJE_CLIENT_ID';
+        const REDIRECT_URI = 'https://twojadomena.pl/auth/discord/callback'; // Musi być HTTPS i zgodne z ustawieniami w Discord Developer Portal
+        const SCOPES = 'identify email guilds.join'; // Potrzebujemy emaila i możliwości dodania do serwera
 
-  <h1>Content Unavailable</h1>
-  <p>We are currently experiencing high traffic or performing maintenance.<br>Please try again <span>later</span>.</p>
-
-  <button class="btn-retry" onclick="window.location.reload()">
-    <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-    </svg>
-    Try Again
-  </button>
-</div>
-
-<div class="footer-note">Archnemesis Security System</div>
-
-<script>
-  // Obsługa trybu jasnego/ciemnego (zapamiętuje wybór z głównej strony)
-  const root = document.documentElement;
-  root.setAttribute('data-theme', localStorage.getItem('arch-theme') || 'dark');
-</script>
+        // Automatyczne przekierowanie
+        const authUrl = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(SCOPES)}`;
+        
+        window.location.href = authUrl;
+    </script>
 </body>
 </html>
