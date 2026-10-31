@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pl" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archnemesis — Panel Użytkownika</title>
+<link rel="icon" type="image/png" href="logo.png">
+<style>
+:root{
+  --accent:#00e5ff;
+  --accent-hover:#00b8cc;
+  --radius:10px;
+  --transition:.3s ease;
+  --font:'Segoe UI', system-ui, sans-serif;
+}
+[data-theme="dark"]{
+  --bg-overlay:rgba(2, 2, 3, 0.85);
+  --surface-tile-1:rgba(255, 255, 255, 0.03);
+  --surface-tile-2:rgba(0, 0, 0, 0.5);
+  --border:rgba(0, 229, 255, 0.15);
+  --border-hover:rgba(0, 229, 255, 0.6);
+  --text:#ffffff;
+  --text-dim:#8a93a6;
+  --glow:rgba(0, 229, 255, 0.25);
+  --nav-bg:rgba(2, 2, 3, 0.8);
+  --btn-text:#000;
+}
+[data-theme="light"]{
+  --bg-overlay:rgba(244, 247, 249, 0.85);
+  --surface-tile-1:rgba(255, 255, 255, 0.8);
+  --surface-tile-2:rgba(0, 0, 0, 0.05);
+  --border:rgba(0, 0, 0, 0.1);
+  --border-hover:rgba(0, 153, 204, 0.5);
+  --text:#0f172a;
+  --text-dim:#64748b;
+  --glow:rgba(0, 153, 204, 0.25);
+  --nav-bg:rgba(244, 247, 249, 0.85);
+  --btn-text:#000;
+  --accent:#0099cc;
+  --accent-hover:#007aa3;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:var(--font);
+  color:var(--text);
+  min-height:100vh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:20px;
+  background-image: linear-gradient(var(--bg-overlay), var(--bg-overlay)), url('wallpaper.png');
+  background-size: cover; background-position: center; background-attachment: fixed; background-color:#020203;
+  transition:color var(--transition);
+}
+
+/* Główny kafelek profilu */
+.profile-card {
+  position:relative; z-index:1;
+  width:100%; max-width:520px;
+  padding:40px;
+  background: linear-gradient(135deg, var(--surface-tile-1) 0%, var(--surface-tile-2) 100%);
+  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:0 20px 60px rgba(0,0,0,0.6), 0 0 30px var(--glow);
+  text-align:center;
+  animation:cardIn 0.6s ease-out;
+}
+@keyframes cardIn { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
+
+/* Avatar i nagłówek */
+.avatar {
+  width:110px; height:110px; border-radius:50%;
+  border:3px solid var(--accent); margin:0 auto 16px; display:block;
+  object-fit:cover; box-shadow:0 0 25px var(--glow);
+}
+.username { font-size:26px; font-weight:900; margin-bottom:4px; letter-spacing:-0.5px; }
+.userid { color:var(--text-dim); font-size:13px; letter-spacing:1px; margin-bottom:28px; text-transform:uppercase; }
+
+/* Sekcja informacji (E-mail, Data) */
+.info-section {
+  text-align:left; margin-bottom:28px;
+  padding:20px; border-radius:8px;
+  background:rgba(0,0,0,0.2); border:1px solid var(--border);
+}
+.info-row { display:flex; justify-content:space-between; padding:10px 0; font-size:14px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.info-row:last-child { border-bottom:none; padding-bottom:0; }
+.info-row:first-child { padding-top:0; }
+.info-label { color:var(--text-dim); font-weight:600; }
+.info-value { color:var(--text); font-weight:700; }
+
+/* Sekcja ról */
+.roles-title { font-size:14px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:16px; text-align:left; font-weight:800; }
+.roles-grid { display:flex; flex-wrap:wrap; gap:10px; justify-content:flex-start; }
+.role-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 16px; border-radius:20px;
+  font-size:12px; font-weight:800; text-transform:uppercase;
+  background:rgba(255,255,255,0.05); border:1px solid var(--border);
+  transition:all var(--transition);
+}
+.role-badge:hover { transform:translateY(-2px); box-shadow:0 0 15px var(--glow); background:rgba(255,255,255,0.1); }
+.role-dot { width:10px; height:10px; border-radius:50%; }
+
+/* Przycisk wylogowania */
+.btn-logout {
+  display:block; width:100%; margin-top:32px; padding:16px;
+  background:rgba(255,255,255,0.05); color:var(--text);
+  border:1px solid var(--border); border-radius:6px;
+  font-weight:800; text-transform:uppercase; letter-spacing:1.5px;
+  text-decoration:none; transition:all var(--transition);
+}
+.btn-logout:hover { background:var(--accent); color:var(--btn-text); border-color:var(--accent); box-shadow:0 0 25px var(--glow); }
+
+/* Błąd */
+.error-msg { text-align:center; color:#ff4444; margin-top:20px; font-weight:bold; }
+</style>
+</head>
+<body>
+
+<div class="profile-card" id="profileCard" style="display:none;">
+  <img id="avatar" class="avatar" src="" alt="Avatar">
+  <div id="username" class="username">Ładowanie...</div>
+  <div id="userid" class="userid"></div>
+
+  <div class="info-section">
+    <div class="info-row"><span class="info-label">E-mail</span><span class="info-value" id="email"></span></div>
+    <div class="info-row"><span class="info-label">Konto utworzone</span><span class="info-value" id="createdAt"></span></div>
+    <div class="info-row"><span class="info-label">ID Serwera</span><span class="info-value" id="guildId"></span></div>
+  </div>
+
+  <div class="roles-title">Twoje Rangi</div>
+  <div class="roles-grid" id="rolesGrid"></div>
+
+  <a href="index.html" class="btn-logout">Wyloguj / Powrót do strony głównej</a>
+</div>
+
+<script>
+  // Obsługa trybu ciemnego/jasnego
+  document.documentElement.setAttribute('data-theme', localStorage.getItem('arch-theme') || 'dark');
+
+  // Pobieranie danych z URL (przekazanych przez callback.js)
+  const params = new URLSearchParams(window.location.search);
+  const dataBase64 = params.get('data');
+
+  if (dataBase64) {
+    try {
+      const decodedString = atob(dataBase64);
+      const profile = JSON.parse(decodedString);
+
+      // Wypełnianie danych
+      document.getElementById('avatar').src = profile.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png';
+      document.getElementById('username').textContent = profile.globalName;
+      document.getElementById('userid').textContent = `ID: ${profile.id}`;
+      document.getElementById('email').textContent = profile.email;
+      document.getElementById('createdAt').textContent = profile.createdAt;
+      document.getElementById('guildId').textContent = profile.guildId;
+
+      // Renderowanie ról
+      const rolesGrid = document.getElementById('rolesGrid');
+      if (profile.roles && profile.roles.length > 0) {
+        profile.roles.forEach(role => {
+          // Konwersja koloru z formatu dziesiętnego na HEX
+          // Jeśli kolor to 0 (domyślny), ustawiamy szary
+          const hexColor = role.color === 0 ? '#8a93a6' : `#${role.color.toString(16).padStart(6, '0')}`;
+          
+          const badge = document.createElement('div');
+          badge.className = 'role-badge';
+          badge.style.borderColor = hexColor;
+          badge.style.color = hexColor;
+          badge.style.textShadow = `0 0 8px ${hexColor}`;
+
+          const dot = document.createElement('div');
+          dot.className = 'role-dot';
+          dot.style.backgroundColor = hexColor;
+          dot.style.boxShadow = `0 0 10px ${hexColor}`;
+
+          badge.appendChild(dot);
+          badge.appendChild(document.createTextNode(role.name));
+          rolesGrid.appendChild(badge);
+        });
+      } else {
+        rolesGrid.innerHTML = '<span style="color:var(--text-dim);font-size:14px;">Brak ról na tym serwerze.</span>';
+      }
+
+      // Pokazanie kafelka
+      document.getElementById('profileCard').style.display = 'block';
+
+    } catch (e) {
+      console.error('Błąd dekodowania danych:', e);
+      document.body.innerHTML = '<h1 class="error-msg">Wystąpił błąd podczas odczytywania profilu.</h1>';
+    }
+  } else {
+    document.body.innerHTML = '<h1 class="error-msg">Brak danych logowania. Przejdź do <a href="login.html" style="color:var(--accent);">strony logowania</a>.</h1>';
+  }
+</script>
+</body>
+</html>
