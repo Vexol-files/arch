@@ -17,15 +17,16 @@
     </div>
 
     <script>
-        // KONFIGURACJA
-        const CLIENT_ID = 'TWOJE_CLIENT_ID';
-        const REDIRECT_URI = 'https://twojadomena.pl/auth/discord/callback'; // Musi być HTTPS i zgodne z ustawieniami w Discord Developer Portal
-        const SCOPES = 'identify email guilds.join'; // Potrzebujemy emaila i możliwości dodania do serwera
+       // KONFIGURACJA
+       const CLIENT_ID = '1532718787139207301'; // Twoje Client ID
+       const REDIRECT_URI = 'https://projectarch.vercel.app/api/discord/callback'; // TYLKO TWÓJ CALLBACK NA VERCEL
+       const SCOPES = 'identify email guilds guilds.members.read'; 
+       // identify - profil, email - email, guilds.members.read - odczyt ról
 
-        // Automatyczne przekierowanie
-        const authUrl = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(SCOPES)}`;
-        
-        window.location.href = authUrl;
+       // Automatyczne przekierowanie na Discorda
+       const authUrl = `https://discord.com/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=${encodeURIComponent(SCOPES)}`;
+    
+       window.location.href = authUrl;
     </script>
 </body>
 </html>
