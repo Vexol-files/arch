@@ -26,7 +26,8 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;display:flex;fle
 .username{font-size:24px;font-weight:900;margin-bottom:5px}
 .userid{color:var(--text-dim);font-size:12px;margin-bottom:20px}
 .roles-grid{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:20px}
-.role-badge{padding:6px 12px;border-radius:15px;font-size:11px;font-weight:800;text-transform:uppercase;border:1px solid var(--border);background:rgba(0,0,0,0.2)}
+.role-badge{padding:6px 12px;border-radius:15px;font-size:11px;font-weight:800;text-transform:uppercase;border:1px solid var(--border);background:rgba(0,0,0,0.2);display:inline-flex;align-items:center;gap:5px}
+.role-dot{width:8px;height:8px;border-radius:50%}
 .btn-logout{display:block;width:100%;margin-top:20px;padding:14px;background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border);border-radius:6px;font-weight:800;text-transform:uppercase;text-decoration:none;transition:all .3s;text-align:center}
 .btn-logout:hover{background:var(--accent);color:#000;border-color:var(--accent)}
 
@@ -35,6 +36,7 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;display:flex;fle
 .admin-section{padding:20px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px}
 .admin-section h3{color:var(--text);margin-bottom:12px;font-size:14px;border-bottom:1px solid var(--border);padding-bottom:8px;text-transform:uppercase;letter-spacing:1px}
 input,select,textarea{width:100%;padding:10px;margin-bottom:8px;background:var(--input-bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:inherit;font-size:13px}
+input[type="color"]{padding:2px;height:40px;cursor:pointer}
 button{width:100%;padding:10px;background:var(--accent);color:#000;border:none;border-radius:5px;font-weight:800;cursor:pointer;transition:all .3s;text-transform:uppercase;letter-spacing:1px;font-size:12px;margin-bottom:5px}
 button:hover{background:#fff;box-shadow:0 0 15px var(--glow)}
 button.danger{background:#ff4444;color:#fff}
@@ -49,6 +51,8 @@ button.warning:hover{background:#ffcc44}
 .search-item span{font-size:14px}
 .selected-user{padding:10px;background:rgba(0,229,255,0.1);border:1px solid var(--accent);border-radius:5px;margin-bottom:10px;display:none;color:var(--accent);font-weight:bold;font-size:13px}
 pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:8px;font-size:12px;color:#00ffaa;max-height:250px;overflow-y:auto;display:none;white-space:pre-wrap}
+.role-list-item{display:flex;align-items:center;gap:8px;padding:5px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-dim)}
+.role-list-item .role-dot{flex-shrink:0}
 .error-msg{text-align:center;color:#ff4444;margin-top:20px;font-weight:bold}
 </style>
 </head>
@@ -109,9 +113,6 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <select id="channelSelect"></select>
                     <textarea id="sayMessage" placeholder="Message for Channel" rows="2"></textarea>
                     <button onclick="adminAction('say', {channelId: val('channelSelect'), message: val('sayMessage')})">Send to Channel</button>
-                    <input type="text" id="delMsgChannelId" placeholder="Channel ID (for delete)">
-                    <input type="text" id="delMsgId" placeholder="Message ID">
-                    <button onclick="adminAction('delete_message', {channelId: val('delMsgChannelId'), messageId: val('delMsgId')})" class="danger">Delete Message</button>
                 </div>
 
                 <!-- ROLES -->
@@ -123,12 +124,14 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <button onclick="adminAction('delete_role', {roleId: val('roleSelect')})" class="danger">Delete Selected Role</button>
                     <hr style="border-color:var(--border);margin:10px 0">
                     <input type="text" id="newRoleName" placeholder="New Role Name">
-                    <input type="text" id="newRoleColor" placeholder="Color (hex, e.g. ff0000)">
-                    <input type="text" id="newRolePerms" placeholder="Permissions (integer)">
+                    <input type="color" id="newRoleColor" value="#00e5ff">
+                    <input type="text" id="newRolePerms" placeholder="Permissions (integer, leave 0)">
                     <button onclick="adminAction('create_role', {name: val('newRoleName'), color: val('newRoleColor'), permissions: val('newRolePerms')})">Create Role</button>
-                    <input type="text" id="editRoleId" placeholder="Role ID to Edit">
+                    <hr style="border-color:var(--border);margin:10px 0">
+                    <select id="editRoleSelect"></select>
                     <input type="text" id="editRoleName" placeholder="New Name">
-                    <button onclick="adminAction('edit_role', {roleId: val('editRoleId'), name: val('editRoleName'), color: val('newRoleColor'), permissions: val('newRolePerms')})">Edit Role</button>
+                    <input type="color" id="editRoleColor" value="#00e5ff">
+                    <button onclick="adminAction('edit_role', {roleId: val('editRoleSelect'), name: val('editRoleName'), color: val('editRoleColor')})">Edit Role</button>
                 </div>
 
                 <!-- CHANNELS -->
@@ -159,6 +162,12 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <hr style="border-color:var(--border);margin:10px 0">
                     <select id="inviteChannelSelect"></select>
                     <button onclick="adminAction('create_invite', {channelId: val('inviteChannelSelect')})">Create Invite</button>
+                </div>
+
+                <!-- LISTA RÓL -->
+                <div class="admin-section">
+                    <h3>All Roles</h3>
+                    <div id="allRolesList" style="max-height:200px;overflow-y:auto"></div>
                 </div>
             </div>
 
@@ -191,7 +200,7 @@ if (dataBase64) {
         if (profile.roles && profile.roles.length > 0) {
             profile.roles.forEach(r => {
                 const hex = r.color === 0 ? '#8a93a6' : `#${r.color.toString(16).padStart(6, '0')}`;
-                rolesGrid.innerHTML += `<span class="role-badge" style="border-color:${hex};color:${hex}">${r.name}</span>`;
+                rolesGrid.innerHTML += `<span class="role-badge"><span class="role-dot" style="background:${hex};box-shadow:0 0 8px ${hex}"></span>${r.name}</span>`;
             });
         } else {
             rolesGrid.innerHTML = '<span style="color:var(--text-dim);font-size:12px;">No roles</span>';
@@ -259,9 +268,18 @@ async function loadAdminData() {
         document.getElementById('editChannelSelect').innerHTML = options;
         document.getElementById('inviteChannelSelect').innerHTML = options;
     }
+    
     const roleRes = await apiCall('get_roles', {});
     if (roleRes.success) {
-        document.getElementById('roleSelect').innerHTML = roleRes.roles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+        const roleOptions = roleRes.roles.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+        document.getElementById('roleSelect').innerHTML = roleOptions;
+        document.getElementById('editRoleSelect').innerHTML = roleOptions;
+
+        const allRolesDiv = document.getElementById('allRolesList');
+        allRolesDiv.innerHTML = roleRes.roles.map(r => {
+            const hex = r.color === 0 ? '#8a93a6' : `#${r.color.toString(16).padStart(6, '0')}`;
+            return `<div class="role-list-item"><span class="role-dot" style="background:${hex};box-shadow:0 0 6px ${hex}"></span><span style="color:${hex}">${r.name}</span></div>`;
+        }).join('');
     }
 }
 
