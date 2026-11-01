@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
     try {
         await client.connect();
-        const db = client.db('Cluster0');
+        const db = client.db('Cluster0'); // Upewnij się, że to poprawna nazwa bazy
         const updatesCollection = db.collection('updates');
         const keysCollection = db.collection('keys');
 
@@ -32,24 +32,23 @@ export default async function handler(req, res) {
             if (!keyData) return res.status(404).json({ error: 'Invalid script_key' });
 
             // 2. Mapowanie typu z bazy na typ skryptu w updates
-            // Jeśli w bazie masz key_type: "PREMIUM", to szukamy type: "premium"
             const scriptType = keyData.key_type.toLowerCase(); 
 
-            // 3. Pobieramy zaszyfrowany skrypt
-            const script = await updatesCollection.findOne({ type: scriptType });
-            if (!script) return res.status(404).json({ error: 'Script not found for this tier' });
+            // 3. Pobieramy skrypt (teraz szukamy pola 'script', a nie 'encryptedScript')
+            const scriptData = await updatesCollection.findOne({ type: scriptType });
+            if (!scriptData) return res.status(404).json({ error: 'Script not found for this tier' });
 
-            // 4. Zwracamy skrypt i informacje o wersji
+            // 4. Zwracamy skrypt
             return res.status(200).json({
                 success: true,
-                filename: script.filename,
-                version: script.version,
-                encryptedScript: script.encryptedScript // Ten ciąg znaków Lua odszyfruje i wykona
+                filename: scriptData.filename,
+                version: scriptData.version,
+                script: scriptData.script // <-- ZMIENIONE Z encryptedScript NA script
             });
         }
 
         // ==========================================
-        // SPRAWDZANIE STATUSU (np. czy skrypt jest włączony)
+        // SPRAWDZANIE STATUSU
         // ==========================================
         if (action === 'get_status') {
             const settings = await db.collection('settings').findOne({});
