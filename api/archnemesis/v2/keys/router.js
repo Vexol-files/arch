@@ -11,30 +11,31 @@ export default async function handler(req, res) {
 
     if (req.method === 'OPTIONS') return res.status(200).end();
 
+    // Pobieranie danych z zapytania
     const { action, ...params } = req.method === 'POST' ? req.body : req.query;
 
     try {
         await client.connect();
-        const db = client.db('Cluster0');
+        const db = client.db('Cluster0'); // Upewnij się, że nazwa bazy jest poprawna
         const keysCollection = db.collection('keys');
         const hwidLogsCollection = db.collection('hwid_logs');
 
         // ==========================================
-        // WERYFIKACJA KLUCZA I PRZYPISANIE HWID
+        // WERYFIKACJA KLUCZA (script_key) I HWID
         // ==========================================
         if (action === 'verify_key') {
-            const { key, hwid } = params;
+            const { script_key, hwid } = params;
 
-            if (!key) return res.status(400).json({ error: 'Key is required' });
-            if (!hwid) return res.status(400).json({ error: 'HWID is required' });
+            if (!script_key) return res.status(400).json({ success: false, error: 'Missing script_key' });
+            if (!hwid) return res.status(400).json({ success: false, error: 'Missing HWID' });
 
-            // Szukamy klucza w bazie
-            const keyData = await keysCollection.findOne({ key: key });
+            // Szukamy klucza w kolekcji 'keys'
+            const keyData = await keysCollection.findOne({ key: script_key });
 
             if (!keyData) {
-                // Opcjonalnie: logowanie nieudanej próby
-                await hwidLogsCollection.insertOne({ hwid, key, status: 'invalid_key', timestamp: new Date() });
-                return res.status(404).json({ success: false, error: 'Invalid key' });
+                // Opcjonalne logowanie nieudanej próby
+                await hwidLogsCollection.insertOne({ hwid, key: script_key, status: 'invalid_key', timestamp: new Date() });
+                return res.status(404).json({ success: false, error: 'Invalid script_key' });
             }
 
             // Sprawdzanie daty ważności
@@ -46,75 +47,32 @@ export default async function handler(req, res) {
             }
 
             // Sprawdzanie HWID
-            if (keyData.hwid) {
-                // Klucz jest już przypisany do jakiegoś sprzętu
-                if (keyData.hwid !== hwid) {
-                    await hwidLogsCollection.insertOne({ hwid, key, status: 'hwid_mismatch', timestamp: new Date() });
-                    return res.status(403).json({ success: false, error: 'Key is bound to another HWID' });
-                }
-            } else {
-                // Klucz nie ma jeszcze przypisanego HWID - przypisujemy go teraz
+            if (keyData.hwid && keyData.hwid !== hwid) {
+                await hwidLogsCollection.insertOne({ hwid, key: script_key, status: 'hwid_mismatch', timestamp: new Date() });
+                return res.status(403).json({ success: false, error: 'Key is bound to another HWID' });
+            } else if (!keyData.hwid) {
+                // Przypisujemy HWID do klucza przy pierwszym użyciu
                 await keysCollection.updateOne(
                     { _id: keyData._id },
-                    { $set: { hwid: hwid, owner: params.owner || null } }
+                    { $set: { hwid: hwid } }
                 );
             }
 
             // Sukces
-            await hwidLogsCollection.insertOne({ hwid, key, status: 'success', timestamp: new Date() });
+            await hwidLogsCollection.insertOne({ hwid, key: script_key, status: 'success', timestamp: new Date() });
             
             return res.status(200).json({
                 success: true,
                 message: 'Key verified successfully',
-                type: keyData.key_type, // 'PREMIUM', 'FREE', 'BETA'
+                type: keyData.key_type, // np. 'PREMIUM', 'BETA', 'FREE'
                 expires: keyData.expires
             });
         }
 
-        // ==========================================
-        // RESETOWANIE HWID (np. z panelu admina)
-        // ==========================================
-        if (action === 'reset_hwid') {
-            const { key } = params;
-            if (!key) return res.status(400).json({ error: 'Key is required' });
-
-            const result = await keysCollection.updateOne(
-                { key: key },
-                { $set: { hwid: null } }
-            );
-
-            if (result.matchedCount === 0) return res.status(404).json({ error: 'Key not found' });
-
-            return res.status(200).json({ success: true, message: 'HWID reset successfully' });
-        }
-
-        // ==========================================
-        // GENEROWANIE NOWEGO KLUCZA (dla admina)
-        // ==========================================
-        if (action === 'generate_key') {
-            const { key_type, expires } = params; // np. key_type: 'PREMIUM', expires: '2027-01-01T00:00:00Z' lub 'never'
-            
-            // Generowanie losowego klucza (np. AR-XXXX-XXXX-XXXX)
-            const generatedKey = 'AR-' + Math.random().toString(36).substring(2, 6).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-
-            const newKeyData = {
-                key: generatedKey,
-                key_type: key_type || 'PREMIUM',
-                created: Date.now().toString(),
-                expires: expires || 'never',
-                owner: null,
-                hwid: null
-            };
-
-            await keysCollection.insertOne(newKeyData);
-
-            return res.status(200).json({ success: true, key: generatedKey, data: newKeyData });
-        }
-
-        return res.status(400).json({ error: 'Unknown action' });
+        return res.status(400).json({ success: false, error: 'Unknown action' });
 
     } catch (error) {
         console.error('Keys API Error:', error);
-        return res.status(500).json({ error: 'Internal Server Error', details: error.message });
+        return res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 }
