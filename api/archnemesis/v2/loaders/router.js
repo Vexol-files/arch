@@ -15,7 +15,8 @@ export default async function handler(req, res) {
 
     try {
         await client.connect();
-        const db = client.db('Cluster0'); // Upewnij się, że to poprawna nazwa bazy
+        // POPRAWIONA NAZWA BAZY DANYCH
+        const db = client.db('loader_system'); 
         const updatesCollection = db.collection('updates');
         const keysCollection = db.collection('keys');
 
@@ -25,30 +26,30 @@ export default async function handler(req, res) {
         if (action === 'get_script') {
             const { script_key } = params;
 
-            if (!script_key) return res.status(400).json({ error: 'Missing script_key' });
+            if (!script_key) return res.status(400).json({ success: false, error: 'Missing script_key' });
 
             // 1. Sprawdzamy, jaki to typ klucza (PREMIUM, BETA, FREE)
             const keyData = await keysCollection.findOne({ key: script_key });
-            if (!keyData) return res.status(404).json({ error: 'Invalid script_key' });
+            if (!keyData) return res.status(404).json({ success: false, error: 'Invalid script_key' });
 
-            // 2. Mapowanie typu z bazy na typ skryptu w updates (zamiana na małe litery)
+            // 2. Mapowanie typu z bazy na typ skryptu w updates
             const scriptType = keyData.key_type.toLowerCase(); 
 
-            // 3. Pobieramy skrypt, szukając pola 'Script' (z dużej litery, jak w Twojej bazie)
+            // 3. Pobieramy skrypt (szukamy pola 'Script' z dużej litery, tak jak w Twojej bazie)
             const scriptData = await updatesCollection.findOne({ type: scriptType });
-            if (!scriptData) return res.status(404).json({ error: 'Script not found for this tier' });
+            if (!scriptData) return res.status(404).json({ success: false, error: 'Script not found for this tier' });
 
             // 4. Zwracamy skrypt
             return res.status(200).json({
                 success: true,
                 filename: scriptData.filename,
                 version: scriptData.version,
-                script: scriptData.Script // <-- ZMIENIONE NA DUŻĄ LITERĘ 'S'
+                script: scriptData.Script // Pobieramy pole 'Script'
             });
         }
 
         // ==========================================
-        // SPRAWDZANIE STATUSU
+        // SPRAWDZANIE STATUSU SKRYPTU
         // ==========================================
         if (action === 'get_status') {
             const settings = await db.collection('settings').findOne({});
@@ -59,10 +60,10 @@ export default async function handler(req, res) {
             });
         }
 
-        return res.status(400).json({ error: 'Unknown action' });
+        return res.status(400).json({ success: false, error: 'Unknown action' });
 
     } catch (error) {
         console.error('Loader API Error:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 }
