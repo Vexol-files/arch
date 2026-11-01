@@ -4,5 +4,20 @@
       "source": "/api/archnemesis/v2/loaders/:file",
       "destination": "/api/archnemesis/v2/loaders/router?file=:file"
     }
+  ],
+  "headers": [
+    {
+      "source": "/api/archnemesis/v2/loaders/(.*)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
+    }
   ]
 }
