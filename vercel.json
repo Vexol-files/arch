@@ -1,8 +1,8 @@
 {
   "rewrites": [
     {
-      "source": "/api/archnemesis/v2/loaders/:tier",
-      "destination": "/api/archnemesis/v2/loaders/router?tier=:tier"
+      "source": "/api/archnemesis/v2/loaders/:file",
+      "destination": "/api/archnemesis/v2/loaders/router?file=:file"
     }
   ]
 }
