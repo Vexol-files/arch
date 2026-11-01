@@ -5,17 +5,15 @@ const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
 export default async function handler(req, res) {
-    // Ustawiamy CORS
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
     if (req.method === 'OPTIONS') return res.status(200).end();
 
-    // Pobieramy zmienne bezpośrednio z adresu URL
-    const { script_key, action } = req.query;
+    // Pobieramy tier (np. "premium.lua") i klucz
+    const { tier, script_key } = req.query;
 
-    // Jeśli brakuje klucza, zwracamy błąd w formie tekstu (żeby Lua nie crashowało)
     if (!script_key) {
         res.setHeader('Content-Type', 'text/plain');
         return res.status(400).send('-- Error: Missing script_key');
@@ -27,33 +25,26 @@ export default async function handler(req, res) {
         const updatesCollection = db.collection('updates');
         const keysCollection = db.collection('keys');
 
-        // 1. Sprawdzamy, czy klucz istnieje w bazie
+        // 1. Weryfikacja klucza (opcjonalnie: sprawdź, czy typ klucza pasuje do tieru)
         const keyData = await keysCollection.findOne({ key: script_key });
         if (!keyData) {
             res.setHeader('Content-Type', 'text/plain');
             return res.status(404).send('-- Error: Invalid script_key');
         }
 
-        // 2. Sprawdzamy status (opcjonalnie, jeśli chcesz blokować wyłączone skrypty)
-        if (action === 'status') {
-            const settings = await db.collection('settings').findOne({});
-            return res.status(200).json({
-                success: true,
-                status: settings ? settings.script_status : 'off'
-            });
-        }
+        // 2. Ustalamy typ skryptu na podstawie adresu URL (usuwamy ".lua")
+        // Jeśli użyto router?script_key=..., a nie podano tieru, bierzemy typ z klucza
+        let scriptType = tier ? tier.replace('.lua', '') : keyData.key_type.toLowerCase();
 
-        // 3. Pobieramy skrypt na podstawie typu klucza (premium, free, beta)
-        const scriptType = keyData.key_type.toLowerCase(); 
+        // 3. Pobieramy skrypt
         const scriptData = await updatesCollection.findOne({ type: scriptType });
         
         if (!scriptData) {
             res.setHeader('Content-Type', 'text/plain');
-            return res.status(404).send('-- Error: Script not found for this tier');
+            return res.status(404).send('-- Error: Script not found');
         }
 
         // 4. Zwracamy CZYSTY KOD LUA
-        // Dzięki temu game:HttpGet pobierze od razu gotowy kod do loadstring
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(scriptData.Script);
 
