@@ -31,10 +31,10 @@ export default async function handler(req, res) {
             const keyData = await keysCollection.findOne({ key: script_key });
             if (!keyData) return res.status(404).json({ error: 'Invalid script_key' });
 
-            // 2. Mapowanie typu z bazy na typ skryptu w updates
+            // 2. Mapowanie typu z bazy na typ skryptu w updates (zamiana na małe litery)
             const scriptType = keyData.key_type.toLowerCase(); 
 
-            // 3. Pobieramy skrypt (teraz szukamy pola 'script', a nie 'encryptedScript')
+            // 3. Pobieramy skrypt, szukając pola 'Script' (z dużej litery, jak w Twojej bazie)
             const scriptData = await updatesCollection.findOne({ type: scriptType });
             if (!scriptData) return res.status(404).json({ error: 'Script not found for this tier' });
 
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
                 success: true,
                 filename: scriptData.filename,
                 version: scriptData.version,
-                script: scriptData.script // <-- ZMIENIONE Z encryptedScript NA script
+                script: scriptData.Script // <-- ZMIENIONE NA DUŻĄ LITERĘ 'S'
             });
         }
 
