@@ -1,0 +1,8 @@
+{
+  "name": "projectarch",
+  "version": "1.0.0",
+  "description": "Archnemesis Project",
+  "dependencies": {
+    "mongodb": "^6.3.0"
+  }
+}
