@@ -11,9 +11,8 @@
 [data-theme="light"]{--bg-overlay:rgba(244,247,249,0.85);--surface-tile-1:rgba(255,255,255,0.8);--surface-tile-2:rgba(0,0,0,0.05);--border:rgba(0,0,0,0.1);--text:#0f172a;--text-dim:#64748b;--glow:rgba(0,153,204,0.25);--input-bg:rgba(255,255,255,0.8);--accent:#0099cc}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:var(--font);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:linear-gradient(var(--bg-overlay),var(--bg-overlay)),url('wallpaper.png');background-size:cover;background-position:center;background-attachment:fixed;background-color:#020203;transition:color var(--transition)}
-.container{width:100%;max-width:1100px;position:relative;z-index:1}
+.container{width:100%;max-width:1200px;position:relative;z-index:1}
 
-/* Tabs */
 .tabs{display:flex;gap:10px;margin-bottom:20px;justify-content:center;flex-wrap:wrap}
 .tab-btn{padding:12px 24px;background:var(--surface-tile-1);border:1px solid var(--border);color:var(--text-dim);border-radius:6px;cursor:pointer;font-weight:700;text-transform:uppercase;transition:all .3s}
 .tab-btn.active{background:var(--accent);color:#000;border-color:var(--accent);box-shadow:0 0 15px var(--glow)}
@@ -21,7 +20,6 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;display:flex;fle
 .tab-content.active{display:block;animation:fadeIn .4s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
-/* Cards */
 .card{padding:30px;background:linear-gradient(135deg,var(--surface-tile-1) 0%,var(--surface-tile-2) 100%);backdrop-filter:blur(15px);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 20px 60px rgba(0,0,0,0.6)}
 .profile-card{max-width:500px;margin:0 auto;text-align:center}
 .avatar{width:100px;height:100px;border-radius:50%;border:3px solid var(--accent);margin:0 auto 15px;display:block;object-fit:cover;box-shadow:0 0 25px var(--glow)}
@@ -32,9 +30,8 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;display:flex;fle
 .btn-logout{display:block;width:100%;margin-top:20px;padding:14px;background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border);border-radius:6px;font-weight:800;text-transform:uppercase;text-decoration:none;transition:all .3s;text-align:center}
 .btn-logout:hover{background:var(--accent);color:#000;border-color:var(--accent)}
 
-/* Admin */
 .admin-card h2{text-align:center;color:var(--accent);margin-bottom:20px;text-transform:uppercase;letter-spacing:2px}
-.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
 .admin-section{padding:20px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px}
 .admin-section h3{color:var(--text);margin-bottom:12px;font-size:14px;border-bottom:1px solid var(--border);padding-bottom:8px;text-transform:uppercase;letter-spacing:1px}
 input,select,textarea{width:100%;padding:10px;margin-bottom:8px;background:var(--input-bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:inherit;font-size:13px}
@@ -45,14 +42,13 @@ button.danger:hover{background:#ff6666}
 button.warning{background:#ffaa00;color:#000}
 button.warning:hover{background:#ffcc44}
 
-/* Search */
 .search-results{max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:5px;margin-bottom:10px;display:none;background:rgba(0,0,0,0.5)}
 .search-item{display:flex;align-items:center;gap:10px;padding:8px;cursor:pointer;border-bottom:1px solid var(--border)}
 .search-item:hover{background:rgba(0,229,255,0.1)}
 .search-item img{width:30px;height:30px;border-radius:50%}
 .search-item span{font-size:14px}
 .selected-user{padding:10px;background:rgba(0,229,255,0.1);border:1px solid var(--accent);border-radius:5px;margin-bottom:10px;display:none;color:var(--accent);font-weight:bold;font-size:13px}
-pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:8px;font-size:12px;color:#00ffaa;max-height:200px;overflow-y:auto;display:none;white-space:pre-wrap}
+pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px solid var(--border);border-radius:8px;font-size:12px;color:#00ffaa;max-height:250px;overflow-y:auto;display:none;white-space:pre-wrap}
 .error-msg{text-align:center;color:#ff4444;margin-top:20px;font-weight:bold}
 </style>
 </head>
@@ -80,7 +76,6 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
         <div class="card admin-card">
             <h2>Admin Control Center</h2>
             
-            <!-- WYSZUKIWARKA -->
             <div style="margin-bottom:20px;background:rgba(0,0,0,0.2);padding:15px;border-radius:8px">
                 <h3>1. Find User</h3>
                 <input type="text" id="searchUserInput" placeholder="Type username (e.g. vex)" oninput="searchUsers()">
@@ -90,7 +85,6 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
             </div>
 
             <div class="admin-grid">
-                <!-- MODERATION -->
                 <div class="admin-section">
                     <h3>Moderation</h3>
                     <input type="text" id="modReason" placeholder="Reason">
@@ -98,9 +92,9 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <button onclick="adminAction('kick', {userId: getUserId(), reason: val('modReason')})" class="warning">Kick User</button>
                     <button onclick="adminAction('timeout', {userId: getUserId(), duration: 600000})" class="warning">Timeout 10m</button>
                     <button onclick="adminAction('unban', {userId: getUserId()})">Unban User</button>
+                    <button onclick="adminAction('get_bans', {})">List All Bans</button>
                 </div>
 
-                <!-- MESSAGING -->
                 <div class="admin-section">
                     <h3>Messaging</h3>
                     <textarea id="dmMessage" placeholder="Message for DM" rows="2"></textarea>
@@ -110,19 +104,31 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <button onclick="adminAction('say', {channelId: val('channelSelect'), message: val('sayMessage')})">Send to Channel</button>
                 </div>
 
-                <!-- ROLES -->
                 <div class="admin-section">
                     <h3>Role Management</h3>
                     <select id="roleSelect"></select>
                     <button onclick="adminAction('add_role', {userId: getUserId(), roleId: val('roleSelect')})">Add Role</button>
                     <button onclick="adminAction('remove_role', {userId: getUserId(), roleId: val('roleSelect')})" class="danger">Remove Role</button>
+                    <input type="text" id="newRoleName" placeholder="New Role Name">
+                    <button onclick="adminAction('create_role', {name: val('newRoleName')})">Create Role</button>
+                    <button onclick="adminAction('delete_role', {roleId: val('roleSelect')})" class="danger">Delete Selected Role</button>
                 </div>
 
-                <!-- CHANNELS -->
                 <div class="admin-section">
-                    <h3>Channels</h3>
+                    <h3>Channel Management</h3>
+                    <input type="text" id="newChannelName" placeholder="New Channel Name">
+                    <button onclick="adminAction('create_channel', {name: val('newChannelName'), type: 0})">Create Text Channel</button>
+                    <button onclick="adminAction('create_channel', {name: val('newChannelName'), type: 2})">Create Voice Channel</button>
                     <select id="delChannelSelect"></select>
                     <button onclick="adminAction('delete_channel', {channelId: val('delChannelSelect')})" class="danger">Delete Channel</button>
+                </div>
+
+                <div class="admin-section">
+                    <h3>Server Info</h3>
+                    <button onclick="adminAction('get_guild', {})">Get Guild Info</button>
+                    <button onclick="adminAction('get_invites', {})">Get Invites</button>
+                    <button onclick="adminAction('get_roles', {})">List Roles</button>
+                    <button onclick="adminAction('get_channels', {})">List Channels</button>
                 </div>
             </div>
 
@@ -133,7 +139,6 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
 </div>
 
 <script>
-// ===== SETUP =====
 document.documentElement.setAttribute('data-theme', localStorage.getItem('arch-theme') || 'dark');
 const params = new URLSearchParams(window.location.search);
 const dataBase64 = params.get('data');
@@ -182,13 +187,11 @@ function switchTab(name, btn) {
     btn.classList.add('active');
 }
 
-// ===== WYSZUKIWANIE =====
 let searchTimeout;
 function searchUsers() {
     clearTimeout(searchTimeout);
     const query = val('searchUserInput');
     const resultsDiv = document.getElementById('searchResults');
-    
     if (query.length < 2) { resultsDiv.style.display = 'none'; return; }
 
     searchTimeout = setTimeout(async () => {
@@ -217,7 +220,6 @@ function selectUser(id, username) {
     document.getElementById('searchUserInput').value = username;
 }
 
-// ===== ŁADOWANIE LIST =====
 async function loadAdminData() {
     const chanRes = await apiCall('get_channels', {});
     if (chanRes.success) {
@@ -230,7 +232,6 @@ async function loadAdminData() {
     }
 }
 
-// ===== API =====
 async function apiCall(action, params) {
     const res = await fetch('/api/bot/admin_bot', {
         method: 'POST',
