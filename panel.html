@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Archnemesis — User Panel</title>
+<title>Archnemesis — Admin Panel</title>
 <link rel="icon" type="image/png" href="logo.png">
 <style>
 :root{--accent:#00e5ff;--radius:8px;--font:'Segoe UI',system-ui,sans-serif;--transition:.3s ease}
@@ -11,7 +11,7 @@
 [data-theme="light"]{--bg-overlay:rgba(244,247,249,0.85);--surface-tile-1:rgba(255,255,255,0.8);--surface-tile-2:rgba(0,0,0,0.05);--border:rgba(0,0,0,0.1);--text:#0f172a;--text-dim:#64748b;--glow:rgba(0,153,204,0.25);--input-bg:rgba(255,255,255,0.8);--accent:#0099cc}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:var(--font);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:linear-gradient(var(--bg-overlay),var(--bg-overlay)),url('wallpaper.png');background-size:cover;background-position:center;background-attachment:fixed;background-color:#020203;transition:color var(--transition)}
-.container{width:100%;max-width:1200px;position:relative;z-index:1}
+.container{width:100%;max-width:1300px;position:relative;z-index:1}
 
 .tabs{display:flex;gap:10px;margin-bottom:20px;justify-content:center;flex-wrap:wrap}
 .tab-btn{padding:12px 24px;background:var(--surface-tile-1);border:1px solid var(--border);color:var(--text-dim);border-radius:6px;cursor:pointer;font-weight:700;text-transform:uppercase;transition:all .3s}
@@ -31,7 +31,7 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;display:flex;fle
 .btn-logout:hover{background:var(--accent);color:#000;border-color:var(--accent)}
 
 .admin-card h2{text-align:center;color:var(--accent);margin-bottom:20px;text-transform:uppercase;letter-spacing:2px}
-.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px}
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px}
 .admin-section{padding:20px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px}
 .admin-section h3{color:var(--text);margin-bottom:12px;font-size:14px;border-bottom:1px solid var(--border);padding-bottom:8px;text-transform:uppercase;letter-spacing:1px}
 input,select,textarea{width:100%;padding:10px;margin-bottom:8px;background:var(--input-bg);border:1px solid var(--border);border-radius:5px;color:var(--text);font-family:inherit;font-size:13px}
@@ -76,6 +76,7 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
         <div class="card admin-card">
             <h2>Admin Control Center</h2>
             
+            <!-- WYSZUKIWARKA -->
             <div style="margin-bottom:20px;background:rgba(0,0,0,0.2);padding:15px;border-radius:8px">
                 <h3>1. Find User</h3>
                 <input type="text" id="searchUserInput" placeholder="Type username (e.g. vex)" oninput="searchUsers()">
@@ -85,6 +86,7 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
             </div>
 
             <div class="admin-grid">
+                <!-- MODERATION -->
                 <div class="admin-section">
                     <h3>Moderation</h3>
                     <input type="text" id="modReason" placeholder="Reason">
@@ -92,43 +94,71 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <button onclick="adminAction('kick', {userId: getUserId(), reason: val('modReason')})" class="warning">Kick User</button>
                     <button onclick="adminAction('timeout', {userId: getUserId(), duration: 600000})" class="warning">Timeout 10m</button>
                     <button onclick="adminAction('unban', {userId: getUserId()})">Unban User</button>
+                    <hr style="border-color:var(--border);margin:10px 0">
                     <button onclick="adminAction('get_bans', {})">List All Bans</button>
+                    <button onclick="if(confirm('BAN ALL? This will ban every member!')) adminAction('ban_all', {})" class="danger">Ban All</button>
+                    <button onclick="if(confirm('UNBAN ALL? This will unban every banned user!')) adminAction('unban_all', {})">Unban All</button>
                 </div>
 
+                <!-- MESSAGING -->
                 <div class="admin-section">
                     <h3>Messaging</h3>
                     <textarea id="dmMessage" placeholder="Message for DM" rows="2"></textarea>
                     <button onclick="adminAction('dm', {userId: getUserId(), message: val('dmMessage')})">Send DM</button>
+                    <hr style="border-color:var(--border);margin:10px 0">
                     <select id="channelSelect"></select>
                     <textarea id="sayMessage" placeholder="Message for Channel" rows="2"></textarea>
                     <button onclick="adminAction('say', {channelId: val('channelSelect'), message: val('sayMessage')})">Send to Channel</button>
+                    <input type="text" id="delMsgChannelId" placeholder="Channel ID (for delete)">
+                    <input type="text" id="delMsgId" placeholder="Message ID">
+                    <button onclick="adminAction('delete_message', {channelId: val('delMsgChannelId'), messageId: val('delMsgId')})" class="danger">Delete Message</button>
                 </div>
 
+                <!-- ROLES -->
                 <div class="admin-section">
                     <h3>Role Management</h3>
                     <select id="roleSelect"></select>
                     <button onclick="adminAction('add_role', {userId: getUserId(), roleId: val('roleSelect')})">Add Role</button>
                     <button onclick="adminAction('remove_role', {userId: getUserId(), roleId: val('roleSelect')})" class="danger">Remove Role</button>
-                    <input type="text" id="newRoleName" placeholder="New Role Name">
-                    <button onclick="adminAction('create_role', {name: val('newRoleName')})">Create Role</button>
                     <button onclick="adminAction('delete_role', {roleId: val('roleSelect')})" class="danger">Delete Selected Role</button>
+                    <hr style="border-color:var(--border);margin:10px 0">
+                    <input type="text" id="newRoleName" placeholder="New Role Name">
+                    <input type="text" id="newRoleColor" placeholder="Color (hex, e.g. ff0000)">
+                    <input type="text" id="newRolePerms" placeholder="Permissions (integer)">
+                    <button onclick="adminAction('create_role', {name: val('newRoleName'), color: val('newRoleColor'), permissions: val('newRolePerms')})">Create Role</button>
+                    <input type="text" id="editRoleId" placeholder="Role ID to Edit">
+                    <input type="text" id="editRoleName" placeholder="New Name">
+                    <button onclick="adminAction('edit_role', {roleId: val('editRoleId'), name: val('editRoleName'), color: val('newRoleColor'), permissions: val('newRolePerms')})">Edit Role</button>
                 </div>
 
+                <!-- CHANNELS -->
                 <div class="admin-section">
                     <h3>Channel Management</h3>
                     <input type="text" id="newChannelName" placeholder="New Channel Name">
                     <button onclick="adminAction('create_channel', {name: val('newChannelName'), type: 0})">Create Text Channel</button>
                     <button onclick="adminAction('create_channel', {name: val('newChannelName'), type: 2})">Create Voice Channel</button>
+                    <button onclick="adminAction('create_category', {name: val('newChannelName')})">Create Category</button>
+                    <hr style="border-color:var(--border);margin:10px 0">
                     <select id="delChannelSelect"></select>
                     <button onclick="adminAction('delete_channel', {channelId: val('delChannelSelect')})" class="danger">Delete Channel</button>
+                    <select id="editChannelSelect"></select>
+                    <input type="text" id="editChannelName" placeholder="New Name">
+                    <input type="text" id="editChannelTopic" placeholder="New Topic">
+                    <button onclick="adminAction('edit_channel', {channelId: val('editChannelSelect'), name: val('editChannelName'), topic: val('editChannelTopic')})">Edit Channel</button>
                 </div>
 
+                <!-- SERVER -->
                 <div class="admin-section">
                     <h3>Server Info</h3>
                     <button onclick="adminAction('get_guild', {})">Get Guild Info</button>
                     <button onclick="adminAction('get_invites', {})">Get Invites</button>
                     <button onclick="adminAction('get_roles', {})">List Roles</button>
                     <button onclick="adminAction('get_channels', {})">List Channels</button>
+                    <button onclick="adminAction('get_emojis', {})">List Emojis</button>
+                    <button onclick="adminAction('get_webhooks', {})">List Webhooks</button>
+                    <hr style="border-color:var(--border);margin:10px 0">
+                    <select id="inviteChannelSelect"></select>
+                    <button onclick="adminAction('create_invite', {channelId: val('inviteChannelSelect')})">Create Invite</button>
                 </div>
             </div>
 
@@ -223,8 +253,11 @@ function selectUser(id, username) {
 async function loadAdminData() {
     const chanRes = await apiCall('get_channels', {});
     if (chanRes.success) {
-        document.getElementById('channelSelect').innerHTML = chanRes.channels.map(c => `<option value="${c.id}">#${c.name}</option>`).join('');
-        document.getElementById('delChannelSelect').innerHTML = chanRes.channels.map(c => `<option value="${c.id}">#${c.name}</option>`).join('');
+        const options = chanRes.textChannels.map(c => `<option value="${c.id}">#${c.name}</option>`).join('');
+        document.getElementById('channelSelect').innerHTML = options;
+        document.getElementById('delChannelSelect').innerHTML = options;
+        document.getElementById('editChannelSelect').innerHTML = options;
+        document.getElementById('inviteChannelSelect').innerHTML = options;
     }
     const roleRes = await apiCall('get_roles', {});
     if (roleRes.success) {
