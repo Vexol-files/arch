@@ -42,91 +42,109 @@ export default async function handler(req, res) {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background-image: radial-gradient(circle at center, rgba(0, 229, 255, 0.1) 0%, transparent 60%);
         }
         .container {
             text-align: center;
-            background: rgba(15, 18, 25, 0.8);
+            background: rgba(15, 18, 25, 0.9);
             padding: 40px;
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid rgba(0, 229, 255, 0.2);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(0, 229, 255, 0.1);
-            max-width: 600px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(0, 229, 255, 0.15);
+            max-width: 700px;
             width: 100%;
         }
         h1 {
             color: #00e5ff;
-            margin-bottom: 10px;
-            font-size: 24px;
+            margin-bottom: 8px;
+            font-size: 26px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
         }
         p {
             color: #8a93a6;
             margin-bottom: 30px;
-            font-size: 14px;
+            font-size: 15px;
         }
-        .code-box {
+        .code-container {
             background: #000;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            font-family: 'Consolas', monospace;
+            border-radius: 10px;
+            border: 1px solid #1a1f2b;
             text-align: left;
-            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+        .code-header {
+            background: #0a0c10;
+            padding: 10px 20px;
+            border-bottom: 1px solid #1a1f2b;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .code-text {
-            color: #00ffaa;
-            font-size: 14px;
-            overflow-x: auto;
-            white-space: nowrap;
-            user-select: all;
+        .code-title {
+            color: #8a93a6;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
         }
         .copy-btn {
             background: #00e5ff;
             color: #000;
             border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 12px;
+            text-transform: uppercase;
             cursor: pointer;
-            margin-left: 10px;
             transition: 0.2s;
         }
         .copy-btn:hover {
             background: #fff;
             box-shadow: 0 0 15px #00e5ff;
         }
+        .code-content {
+            padding: 25px 20px;
+            font-family: 'Consolas', 'Fira Code', monospace;
+            color: #00ffaa;
+            font-size: 14px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>${scriptType.toUpperCase()} LOADER</h1>
-        <p>This script is protected. Copy the code below to use it in your executor.</p>
+        <p>Copy the code below and execute it in your Roblox executor.</p>
         
-        <div class="code-box">
-            <span class="code-text" id="code1">script_key="_YOUR_SCRIPT_KEY_HERE";</span>
-            <button class="copy-btn" onclick="copy('code1', this)">Copy</button>
-        </div>
-        
-        <div class="code-box">
-            <span class="code-text" id="code2">loadstring(game:HttpGet("https://projectarch.vercel.app/api/archnemesis/v2/loaders/${file}", true))()</span>
-            <button class="copy-btn" onclick="copy('code2', this)">Copy</button>
+        <div class="code-container">
+            <div class="code-header">
+                <span class="code-title">Roblox Script</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
+            </div>
+            <div class="code-content" id="fullCode">script_key="_YOUR_SCRIPT_KEY_HERE";
+loadstring(game:HttpGet("https://projectarch.vercel.app/api/archnemesis/v2/loaders/${file}", true))()</div>
         </div>
     </div>
 
     <script>
-        function copy(id, btn) {
-            const text = document.getElementById(id).innerText;
-            navigator.clipboard.writeText(text).then(() => {
+        function copyCode(btn) {
+            const code = document.getElementById('fullCode').innerText;
+            navigator.clipboard.writeText(code).then(() => {
                 const original = btn.innerText;
                 btn.innerText = 'Copied!';
-                setTimeout(() => btn.innerText = original, 2000);
+                btn.style.background = '#00ffaa';
+                setTimeout(() => {
+                    btn.innerText = original;
+                    btn.style.background = '#00e5ff';
+                }, 2000);
             });
         }
     </script>
