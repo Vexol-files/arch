@@ -5,11 +5,10 @@ const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
 export default async function handler(req, res) {
-    // Ustawiamy CORS i zwracamy czysty tekst
+    // Ustawiamy nagłówki, które Roblox akceptuje
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Content-Type', 'text/plain');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
-    // Pobieramy nazwę pliku z adresu URL (np. "premium.lua")
     const { file } = req.query;
 
     if (!file) {
@@ -21,17 +20,14 @@ export default async function handler(req, res) {
         const db = client.db('loader_system'); 
         const updatesCollection = db.collection('updates');
         
-        // Usuwamy rozszerzenie .lua, żeby zostało samo "premium"
         const scriptType = file.replace('.lua', '');
-
-        // Szukamy w bazie skryptu dla tego typu
         const scriptData = await updatesCollection.findOne({ type: scriptType });
         
         if (!scriptData) {
             return res.status(404).send('-- Error: Script not found');
         }
 
-        // Zwracamy tylko i wyłącznie kod Lua z bazy
+        // Wysyłamy sam kod
         return res.status(200).send(scriptData.Script);
 
     } catch (error) {
