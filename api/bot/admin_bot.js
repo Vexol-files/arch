@@ -27,7 +27,7 @@ export default async function handler(req, res) {
         let response;
 
         switch (action) {
-            // ==================== UŻYTKOWNICY ====================
+            // --- UŻYTKOWNICY ---
             case 'search_users': {
                 const membersRes = await fetch(`${base}/guilds/${GUILD_ID}/members?limit=1000`, { headers });
                 const members = await membersRes.json();
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
             }
             case 'get_user_details': response = await fetch(`${base}/guilds/${GUILD_ID}/members/${params.userId}`, { headers }); break;
 
-            // ==================== MODERACJA ====================
+            // --- MODERACJA ---
             case 'ban': response = await fetch(`${base}/guilds/${GUILD_ID}/bans/${params.userId}`, { method: 'PUT', headers, body: JSON.stringify({ delete_message_seconds: params.deleteMessages ? 604800 : 0, reason: params.reason || 'Admin Panel' }) }); break;
             case 'kick': response = await fetch(`${base}/guilds/${GUILD_ID}/members/${params.userId}`, { method: 'DELETE', headers, body: JSON.stringify({ reason: params.reason || 'Admin Panel' }) }); break;
             case 'unban': response = await fetch(`${base}/guilds/${GUILD_ID}/bans/${params.userId}`, { method: 'DELETE', headers }); break;
@@ -56,10 +56,9 @@ export default async function handler(req, res) {
             }
             case 'get_bans': response = await fetch(`${base}/guilds/${GUILD_ID}/bans`, { headers }); break;
             case 'ban_all': {
-                // Pobiera wszystkich członków (poza botami i właścicielem) i banuje ich
                 const membersRes = await fetch(`${base}/guilds/${GUILD_ID}/members?limit=1000`, { headers });
                 const members = await membersRes.json();
-                const toBan = members.filter(m => !m.user.bot && m.user.id !== GUILD_ID); // Pomijamy boty i właściciela
+                const toBan = members.filter(m => !m.user.bot && m.user.id !== GUILD_ID);
                 let results = { success: 0, failed: 0 };
                 for (const member of toBan) {
                     const banRes = await fetch(`${base}/guilds/${GUILD_ID}/bans/${member.user.id}`, { method: 'PUT', headers, body: JSON.stringify({ reason: 'Mass Ban by Admin' }) });
@@ -78,18 +77,18 @@ export default async function handler(req, res) {
                 return res.json({ success: true, message: `Unbanned ${results.success} users, failed ${results.failed}` });
             }
 
-            // ==================== ROLE ====================
+            // --- ROLE ---
             case 'add_role': response = await fetch(`${base}/guilds/${GUILD_ID}/members/${params.userId}/roles/${params.roleId}`, { method: 'PUT', headers }); break;
             case 'remove_role': response = await fetch(`${base}/guilds/${GUILD_ID}/members/${params.userId}/roles/${params.roleId}`, { method: 'DELETE', headers }); break;
             case 'create_role': {
-                const roleData = { name: params.name, color: parseInt(params.color) || 0, permissions: params.permissions || '0', hoist: params.hoist || false, mentionable: params.mentionable || false };
+                const roleData = { name: params.name, color: parseInt(params.color.replace('#', ''), 16) || 0, permissions: params.permissions || '0', hoist: params.hoist || false, mentionable: params.mentionable || false };
                 response = await fetch(`${base}/guilds/${GUILD_ID}/roles`, { method: 'POST', headers, body: JSON.stringify(roleData) });
                 break;
             }
             case 'edit_role': {
                 const editData = {};
                 if (params.name) editData.name = params.name;
-                if (params.color) editData.color = parseInt(params.color);
+                if (params.color) editData.color = parseInt(params.color.replace('#', ''), 16);
                 if (params.permissions) editData.permissions = params.permissions;
                 if (params.hoist !== undefined) editData.hoist = params.hoist;
                 if (params.mentionable !== undefined) editData.mentionable = params.mentionable;
@@ -105,7 +104,7 @@ export default async function handler(req, res) {
                 return res.json({ success: true, roles: filteredRoles });
             }
 
-            // ==================== KANAŁY ====================
+            // --- KANAŁY ---
             case 'create_channel': {
                 const channelData = { name: params.name, type: params.type || 0 };
                 if (params.topic) channelData.topic = params.topic;
@@ -136,7 +135,7 @@ export default async function handler(req, res) {
             case 'create_category': response = await fetch(`${base}/guilds/${GUILD_ID}/channels`, { method: 'POST', headers, body: JSON.stringify({ name: params.name, type: 4 }) }); break;
             case 'delete_category': response = await fetch(`${base}/channels/${params.categoryId}`, { method: 'DELETE', headers }); break;
 
-            // ==================== WIADOMOŚCI ====================
+            // --- WIADOMOŚCI ---
             case 'dm': {
                 const dmRes = await fetch(`${base}/users/@me/channels`, { method: 'POST', headers, body: JSON.stringify({ recipient_id: params.userId }) });
                 if (!dmRes.ok) throw new Error('Cannot DM user');
@@ -147,18 +146,12 @@ export default async function handler(req, res) {
             case 'say': response = await fetch(`${base}/channels/${params.channelId}/messages`, { method: 'POST', headers, body: JSON.stringify({ content: params.message }) }); break;
             case 'edit_message': response = await fetch(`${base}/channels/${params.channelId}/messages/${params.messageId}`, { method: 'PATCH', headers, body: JSON.stringify({ content: params.newContent }) }); break;
             case 'delete_message': response = await fetch(`${base}/channels/${params.channelId}/messages/${params.messageId}`, { method: 'DELETE', headers }); break;
-            case 'bulk_delete_messages': {
-                response = await fetch(`${base}/channels/${params.channelId}/messages/bulk-delete`, { method: 'POST', headers, body: JSON.stringify({ messages: params.messageIds }) });
-                break;
-            }
+            case 'bulk_delete_messages': response = await fetch(`${base}/channels/${params.channelId}/messages/bulk-delete`, { method: 'POST', headers, body: JSON.stringify({ messages: params.messageIds }) }); break;
 
-            // ==================== SERWER ====================
+            // --- SERWER ---
             case 'get_guild': response = await fetch(`${base}/guilds/${GUILD_ID}?with_counts=true`, { headers }); break;
             case 'get_invites': response = await fetch(`${base}/guilds/${GUILD_ID}/invites`, { headers }); break;
-            case 'create_invite': {
-                response = await fetch(`${base}/channels/${params.channelId}/invites`, { method: 'POST', headers, body: JSON.stringify({ max_age: params.maxAge || 86400, max_uses: params.maxUses || 0, temporary: false }) });
-                break;
-            }
+            case 'create_invite': response = await fetch(`${base}/channels/${params.channelId}/invites`, { method: 'POST', headers, body: JSON.stringify({ max_age: params.maxAge || 86400, max_uses: params.maxUses || 0, temporary: false }) }); break;
             case 'get_emojis': response = await fetch(`${base}/guilds/${GUILD_ID}/emojis`, { headers }); break;
             case 'get_webhooks': response = await fetch(`${base}/guilds/${GUILD_ID}/webhooks`, { headers }); break;
 
@@ -169,7 +162,6 @@ export default async function handler(req, res) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.message || `Discord API Error: ${response.status}`);
         }
-
         let data = {};
         if (response.status !== 204) data = await response.json().catch(() => ({}));
         res.json({ success: true, data });
