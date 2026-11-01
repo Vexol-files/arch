@@ -1,11 +1,10 @@
 // api/archnemesis/v2/loaders/router.js
 import { MongoClient } from 'mongodb';
 
-const uri = process.env.MONGODB_URI; // Dodaj to w Vercel Environment Variables
+const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
 
 export default async function handler(req, res) {
-    // Podstawowe CORS (jeśli strona i API są na różnych domenach)
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -16,28 +15,41 @@ export default async function handler(req, res) {
 
     try {
         await client.connect();
-        const db = client.db('Cluster0'); // Zamień na nazwę swojej bazy, jeśli jest inna
+        const db = client.db('Cluster0');
+        const updatesCollection = db.collection('updates');
+        const keysCollection = db.collection('keys');
 
         // ==========================================
-        // POBIERANIE SKRYPTU (LOADER)
+        // POBIERANIE SKRYPTU DO LOADSTRING
         // ==========================================
         if (action === 'get_script') {
-            const { type } = params; // 'free', 'premium', 'beta'
-            if (!type) return res.status(400).json({ error: 'Missing script type' });
+            const { script_key } = params;
 
-            const script = await db.collection('updates').findOne({ type: type });
-            if (!script) return res.status(404).json({ error: 'Script not found' });
+            if (!script_key) return res.status(400).json({ error: 'Missing script_key' });
 
+            // 1. Sprawdzamy, jaki to typ klucza (PREMIUM, BETA, FREE)
+            const keyData = await keysCollection.findOne({ key: script_key });
+            if (!keyData) return res.status(404).json({ error: 'Invalid script_key' });
+
+            // 2. Mapowanie typu z bazy na typ skryptu w updates
+            // Jeśli w bazie masz key_type: "PREMIUM", to szukamy type: "premium"
+            const scriptType = keyData.key_type.toLowerCase(); 
+
+            // 3. Pobieramy zaszyfrowany skrypt
+            const script = await updatesCollection.findOne({ type: scriptType });
+            if (!script) return res.status(404).json({ error: 'Script not found for this tier' });
+
+            // 4. Zwracamy skrypt i informacje o wersji
             return res.status(200).json({
                 success: true,
                 filename: script.filename,
                 version: script.version,
-                encryptedScript: script.encryptedScript
+                encryptedScript: script.encryptedScript // Ten ciąg znaków Lua odszyfruje i wykona
             });
         }
 
         // ==========================================
-        // SPRAWDZANIE STATUSU SKRYPTU
+        // SPRAWDZANIE STATUSU (np. czy skrypt jest włączony)
         // ==========================================
         if (action === 'get_status') {
             const settings = await db.collection('settings').findOne({});
@@ -48,29 +60,10 @@ export default async function handler(req, res) {
             });
         }
 
-        // ==========================================
-        // LOGOWANIE URUCHOMIENIA
-        // ==========================================
-        if (action === 'log_execution') {
-            const { hwid, key, status } = params;
-            
-            await db.collection('loader_logs').insertOne({
-                hwid: hwid || 'unknown',
-                key: key || 'unknown',
-                status: status || 'success',
-                timestamp: new Date()
-            });
-
-            return res.status(200).json({ success: true, message: 'Log saved' });
-        }
-
         return res.status(400).json({ error: 'Unknown action' });
 
     } catch (error) {
         console.error('Loader API Error:', error);
-        return res.status(500).json({ error: 'Internal Server Error', details: error.message });
-    } finally {
-        // Nie zamykamy klienta przy każdym żądaniu w środowisku serverless dla wydajności,
-        // ale w prostym podejściu można to zostawić (MongoDB Driver sam zarządza pulą).
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 }
