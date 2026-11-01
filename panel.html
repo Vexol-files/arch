@@ -11,15 +11,17 @@
 [data-theme="light"]{--bg-overlay:rgba(244,247,249,0.85);--surface-tile-1:rgba(255,255,255,0.8);--surface-tile-2:rgba(0,0,0,0.05);--border:rgba(0,0,0,0.1);--text:#0f172a;--text-dim:#64748b;--glow:rgba(0,153,204,0.25);--input-bg:rgba(255,255,255,0.8);--accent:#0099cc}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:var(--font);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px;background-image:linear-gradient(var(--bg-overlay),var(--bg-overlay)),url('wallpaper.png');background-size:cover;background-position:center;background-attachment:fixed;background-color:#020203;transition:color var(--transition)}
-.container{width:100%;max-width:1300px;position:relative;z-index:1}
+.container{width:100%;max-width:1400px;position:relative;z-index:1}
 
+/* Tabs */
 .tabs{display:flex;gap:10px;margin-bottom:20px;justify-content:center;flex-wrap:wrap}
-.tab-btn{padding:12px 24px;background:var(--surface-tile-1);border:1px solid var(--border);color:var(--text-dim);border-radius:6px;cursor:pointer;font-weight:700;text-transform:uppercase;transition:all .3s}
+.tab-btn{padding:12px 24px;background:var(--surface-tile-1);border:1px solid var(--border);color:var(--text-dim);border-radius:6px;cursor:pointer;font-weight:700;text-transform:uppercase;transition:all .3s;font-size:12px}
 .tab-btn.active{background:var(--accent);color:#000;border-color:var(--accent);box-shadow:0 0 15px var(--glow)}
 .tab-content{display:none}
 .tab-content.active{display:block;animation:fadeIn .4s ease}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 
+/* Cards */
 .card{padding:30px;background:linear-gradient(135deg,var(--surface-tile-1) 0%,var(--surface-tile-2) 100%);backdrop-filter:blur(15px);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 20px 60px rgba(0,0,0,0.6)}
 .profile-card{max-width:500px;margin:0 auto;text-align:center}
 .avatar{width:100px;height:100px;border-radius:50%;border:3px solid var(--accent);margin:0 auto 15px;display:block;object-fit:cover;box-shadow:0 0 25px var(--glow)}
@@ -31,6 +33,7 @@ body{font-family:var(--font);color:var(--text);min-height:100vh;display:flex;fle
 .btn-logout{display:block;width:100%;margin-top:20px;padding:14px;background:rgba(255,255,255,0.05);color:var(--text);border:1px solid var(--border);border-radius:6px;font-weight:800;text-transform:uppercase;text-decoration:none;transition:all .3s;text-align:center}
 .btn-logout:hover{background:var(--accent);color:#000;border-color:var(--accent)}
 
+/* Admin */
 .admin-card h2{text-align:center;color:var(--accent);margin-bottom:20px;text-transform:uppercase;letter-spacing:2px}
 .admin-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:20px}
 .admin-section{padding:20px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px}
@@ -100,8 +103,13 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <button onclick="adminAction('unban', {userId: getUserId()})">Unban User</button>
                     <hr style="border-color:var(--border);margin:10px 0">
                     <button onclick="adminAction('get_bans', {})">List All Bans</button>
-                    <button onclick="if(confirm('BAN ALL? This will ban every member!')) adminAction('ban_all', {})" class="danger">Ban All</button>
-                    <button onclick="if(confirm('UNBAN ALL? This will unban every banned user!')) adminAction('unban_all', {})">Unban All</button>
+                    <button onclick="document.getElementById('confirmTokenSection').style.display='block'" class="danger">Ban All (Need Token)</button>
+                    <button onclick="document.getElementById('confirmTokenSection').style.display='block'" class="warning">Unban All (Need Token)</button>
+                    <div id="confirmTokenSection" style="display:none;margin-top:10px;background:rgba(0,0,0,0.3);padding:10px;border-radius:5px">
+                        <input type="password" id="botTokenInput" placeholder="Enter Bot Token to confirm">
+                        <button onclick="adminAction('ban_all', {confirmToken: val('botTokenInput')})" class="danger">Confirm Ban All</button>
+                        <button onclick="adminAction('unban_all', {confirmToken: val('botTokenInput')})" class="warning">Confirm Unban All</button>
+                    </div>
                 </div>
 
                 <!-- MESSAGING -->
@@ -113,6 +121,10 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <select id="channelSelect"></select>
                     <textarea id="sayMessage" placeholder="Message for Channel" rows="2"></textarea>
                     <button onclick="adminAction('say', {channelId: val('channelSelect'), message: val('sayMessage')})">Send to Channel</button>
+                    <hr style="border-color:var(--border);margin:10px 0">
+                    <input type="text" id="delMsgChannelId" placeholder="Channel ID">
+                    <input type="text" id="delMsgId" placeholder="Message ID">
+                    <button onclick="adminAction('delete_message', {channelId: val('delMsgChannelId'), messageId: val('delMsgId')})" class="danger">Delete Message</button>
                 </div>
 
                 <!-- ROLES -->
@@ -125,7 +137,7 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <hr style="border-color:var(--border);margin:10px 0">
                     <input type="text" id="newRoleName" placeholder="New Role Name">
                     <input type="color" id="newRoleColor" value="#00e5ff">
-                    <input type="text" id="newRolePerms" placeholder="Permissions (integer, leave 0)">
+                    <input type="text" id="newRolePerms" placeholder="Permissions (0 for none)">
                     <button onclick="adminAction('create_role', {name: val('newRoleName'), color: val('newRoleColor'), permissions: val('newRolePerms')})">Create Role</button>
                     <hr style="border-color:var(--border);margin:10px 0">
                     <select id="editRoleSelect"></select>
@@ -159,12 +171,13 @@ pre#resultBox{margin-top:20px;padding:15px;background:rgba(0,0,0,0.5);border:1px
                     <button onclick="adminAction('get_channels', {})">List Channels</button>
                     <button onclick="adminAction('get_emojis', {})">List Emojis</button>
                     <button onclick="adminAction('get_webhooks', {})">List Webhooks</button>
+                    <button onclick="adminAction('get_audit_log', {})">Recent Audit Log</button>
                     <hr style="border-color:var(--border);margin:10px 0">
                     <select id="inviteChannelSelect"></select>
                     <button onclick="adminAction('create_invite', {channelId: val('inviteChannelSelect')})">Create Invite</button>
                 </div>
 
-                <!-- LISTA RÓL -->
+                <!-- ALL ROLES -->
                 <div class="admin-section">
                     <h3>All Roles</h3>
                     <div id="allRolesList" style="max-height:200px;overflow-y:auto"></div>
