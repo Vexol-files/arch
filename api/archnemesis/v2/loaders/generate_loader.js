@@ -43,7 +43,7 @@ pcall(function() loadstring(_stage2.Body)() end)
 -- ==========================================
 `;
 
-    // Generator śmieci (10 000 linii)
+    // Generator śmieci (10 000 linii) - POPRAWIONY (Zabezpieczony przed nil)
     for (let i = 0; i < 10000; i++) {
         const type = Math.floor(Math.random() * 4); // 4 typy losowych śmieci
         
@@ -52,8 +52,9 @@ pcall(function() loadstring(_stage2.Body)() end)
             loaderCode += `local _junk_var_${i} = ${Math.floor(Math.random() * 9999)} * math.cos(${Math.random()})\n`;
         } 
         else if (type === 1) {
-            // Fałszywe warunki
-            loaderCode += `if _junk_var_${i-1 || 0} % ${Math.floor(Math.random() * 5) + 2} == 0 then _G["_fake_${i}"] = string.rep("X", ${Math.floor(Math.random() * 20)}) end\n`;
+            // Fałszywe warunki (Zawsze definiujemy zmienną jako 0, żeby nie było nil)
+            loaderCode += `local _junk_var_${i} = 0\n`;
+            loaderCode += `if _junk_var_${i} % ${Math.floor(Math.random() * 5) + 2} == 0 then _G["_fake_${i}"] = string.rep("X", ${Math.floor(Math.random() * 20)}) end\n`;
         } 
         else if (type === 2) {
             // Fałszywe pętle
