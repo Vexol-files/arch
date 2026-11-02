@@ -1,5 +1,6 @@
 // api/archnemesis/v2/keys/router.js
 import { MongoClient } from 'mongodb';
+import crypto from 'crypto';
 
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
@@ -15,6 +16,7 @@ export default async function handler(req, res) {
         const db = client.db('loader_system'); 
         const keysCollection = db.collection('keys');
         const hwidLogsCollection = db.collection('hwid_logs');
+        const tempCollection = db.collection('temp_scripts');
 
         // ==========================================
         // 1. WERYFIKACJA KLUCZA I HWID
@@ -30,48 +32,40 @@ export default async function handler(req, res) {
             
             if (!keyData) {
                 await hwidLogsCollection.insertOne({ hwid, key: script_key, status: 'invalid_key', timestamp: new Date() });
-                // Zwracamy "invalid_key", żeby Stage 3 pobrał key.lua
                 return res.status(404).json({ success: false, error: 'invalid_key' });
             }
 
-            // Sprawdzanie bana
+            // Sprawdzanie bana (NOWE)
             if (keyData.banned_until && new Date(keyData.banned_until) > new Date()) {
-                return res.status(403).json({ success: false, error: 'Banned: ' + (keyData.ban_reason || 'Suspicious activity') });
+                return res.status(403).json({ success: false, error: 'banned' });
             }
 
             // Sprawdzanie wygaśnięcia
             if (keyData.expires !== 'never') {
                 if (new Date() > new Date(keyData.expires)) {
-                    return res.status(403).json({ success: false, error: 'Key expired' });
+                    return res.status(403).json({ success: false, error: 'expired' });
                 }
             }
 
             // Sprawdzanie HWID
             if (keyData.hwid && keyData.hwid !== hwid) {
                 await hwidLogsCollection.insertOne({ hwid, key: script_key, status: 'hwid_mismatch', timestamp: new Date() });
-                // Zwracamy "invalid_hwid", żeby Stage 3 pobrał hwid.lua
                 return res.status(403).json({ success: false, error: 'invalid_hwid' });
             } else if (!keyData.hwid) {
                 // Przypisujemy HWID przy pierwszym użyciu
                 await keysCollection.updateOne({ _id: keyData._id }, { $set: { hwid: hwid } });
             }
 
-            // Sukces! Generujemy unikalny 128-znakowy ID dla linku tymczasowego
-            const crypto = await import('crypto');
-            const tempId = crypto.randomBytes(64).toString('hex'); // 128 znaków
+            // Sukces! Generujemy unikalny 128-znakowy ID
+            const tempId = crypto.randomBytes(64).toString('hex');
 
-            const db = client.db('loader_system');
-            const tempCollection = db.collection('temp_scripts');
-
-            // Zapisujemy w bazie, że ten link jest ważny przez 5 minut
             await tempCollection.insertOne({
                 temp_id: tempId,
                 script_key: script_key,
                 created_at: new Date(),
-                expires_at: new Date(Date.now() + 5 * 60 * 1000)
+                expires_at: new Date(Date.now() + 5 * 60 * 1000) // Ważny 5 minut
             });
 
-            // Zwracamy link do pobrania finalnego skryptu
             return res.status(200).json({
                 success: true,
                 message: 'Key verified',
