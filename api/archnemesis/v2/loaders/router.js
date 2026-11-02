@@ -1,5 +1,6 @@
 // api/archnemesis/v2/loaders/router.js
 import { MongoClient } from 'mongodb';
+import crypto from 'crypto';
 
 const uri = process.env.MONGODB_URI;
 const client = new MongoClient(uri);
@@ -51,7 +52,7 @@ export default async function handler(req, res) {
         }
 
         // ==========================================
-        // WIDOK DLA PRZEGLĄDARKI
+        // WIDOK DLA PRZEGLĄDARKI (HTML)
         // ==========================================
         if (isBrowser) {
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -99,25 +100,25 @@ loadstring(game:HttpGet("https://projectarch.vercel.app/api/archnemesis/v2/loade
         }
 
         // ==========================================
-        // WIDOK DLA ROBLOX (FAZA 1 - POBRANIE STATIC CONTENT)
+        // WIDOK DLA ROBLOX (FAZA 1 - GENEROWANIE TOKENU)
         // ==========================================
-        // Ustalamy, który plik static_content ma pobrać loader
-        let staticFile = "static_content_1"; // free
-        if (scriptType === "premium") staticFile = "static_content_2";
-        if (scriptType === "beta") staticFile = "static_content_3";
+        // Generujemy unikalny token dla tego uruchomienia
+        const runToken = crypto.randomBytes(16).toString('hex');
 
-        // Generujemy kod Lua, który pobierze odpowiedni plik z GitHuba (Raw)
+        // Zapisujemy token w bazie (opcjonalnie, ale bezpieczniej)
+        await db.collection('run_tokens').insertOne({
+            token: runToken,
+            script_type: scriptType,
+            created_at: new Date(),
+            used: false
+        });
+
+        // Zwracamy bardzo krótki kod, który pobiera 10 000 linii z generate_loader
         const luaLoader = `
--- Archnemesis Faza 1: Pobieranie Static Content
-local static_url = "https://raw.githubusercontent.com/TWOJ_NICK/projectarch/main/static_content/${staticFile}.lua"
-
-local success, err = pcall(function()
-    loadstring(game:HttpGet(static_url, true))()
-end)
-
-if not success then
-    warn("[Archnemesis] Failed to load static content: " .. tostring(err))
-end
+_G["_ArN_Token"] = "${runToken}"
+local _gen_url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/generate_loader?token=${runToken}"
+local _gen_code = game:HttpGet(_gen_url, true)
+loadstring(_gen_code)()
         `;
 
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
