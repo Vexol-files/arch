@@ -43,25 +43,22 @@ pcall(function() loadstring(_stage2.Body)() end)
 -- ==========================================
 `;
 
-    // Generator śmieci (10 000 linii) - POPRAWIONY (Zabezpieczony przed nil)
+    // Generator śmieci (10 000 linii) - W 100% POPRAWNY (Bez błędu nil)
     for (let i = 0; i < 10000; i++) {
-        const type = Math.floor(Math.random() * 4); // 4 typy losowych śmieci
+        const type = Math.floor(Math.random() * 4);
         
         if (type === 0) {
-            // Fałszywe zmienne i obliczenia
             loaderCode += `local _junk_var_${i} = ${Math.floor(Math.random() * 9999)} * math.cos(${Math.random()})\n`;
         } 
         else if (type === 1) {
-            // Fałszywe warunki (Zawsze definiujemy zmienną jako 0, żeby nie było nil)
-            loaderCode += `local _junk_var_${i} = 0\n`;
+            // Zawsze definiujemy zmienną jako 0, żeby uniknąć błędu "mod on nil"
+            loaderCode += `local _junk_var_${i} = 0\n`; 
             loaderCode += `if _junk_var_${i} % ${Math.floor(Math.random() * 5) + 2} == 0 then _G["_fake_${i}"] = string.rep("X", ${Math.floor(Math.random() * 20)}) end\n`;
         } 
         else if (type === 2) {
-            // Fałszywe pętle
             loaderCode += `for _loop_${i} = 1, ${Math.floor(Math.random() * 3)} do _G["_dummy_${i}"] = (_G["_dummy_${i}"] or 0) + _loop_${i} end\n`;
         } 
         else {
-            // Fałszywe funkcje
             loaderCode += `local function _fake_func_${i}() return ${Math.random()} + ${Math.floor(Math.random() * 100)} end local _ = _fake_func_${i}()\n`;
         }
     }
