@@ -35,16 +35,37 @@ export default async function handler(req, res) {
                 return res.status(404).json({ success: false, error: 'invalid_key' });
             }
 
-            // Sprawdzanie bana (NOWE)
+            // Sprawdzanie bana
             if (keyData.banned_until && new Date(keyData.banned_until) > new Date()) {
                 return res.status(403).json({ success: false, error: 'banned' });
             }
 
-            // Sprawdzanie wygaśnięcia
-            if (keyData.expires !== 'never') {
-                if (new Date() > new Date(keyData.expires)) {
-                    return res.status(403).json({ success: false, error: 'expired' });
+            // --- NOWA FUNKCJA: PARSOWANIE DATY Z FORMATU DDMMYYYYHHmmss ---
+            function parseExpirationDate(expStr) {
+                if (!expStr || expStr === 'never') return null;
+                
+                // Jeśli to już standardowa data ISO (np. z Date.now()), po prostu ją zwróć
+                if (expStr.includes('-') || expStr.includes('T')) return new Date(expStr);
+
+                // Jeśli to nasz format DDMMYYYYHHmmss (14 cyfr)
+                if (expStr.length === 14) {
+                    const sec = parseInt(expStr.substring(12, 14)) || 0;
+                    const min = parseInt(expStr.substring(10, 12)) || 0;
+                    const hour = parseInt(expStr.substring(8, 10)) || 0;
+                    const day = parseInt(expStr.substring(0, 2)) || 1;
+                    const month = parseInt(expStr.substring(2, 4)) || 1;
+                    const year = parseInt(expStr.substring(4, 8)) || 2026;
+                    return new Date(year, month - 1, day, hour, min, sec);
                 }
+
+                // Jeśli nie znamy formatu, zwracamy null (brak wygaśnięcia)
+                return null;
+            }
+
+            // Sprawdzanie wygaśnięcia
+            const expirationDate = parseExpirationDate(keyData.expires);
+            if (expirationDate && new Date() > expirationDate) {
+                return res.status(403).json({ success: false, error: 'expired' });
             }
 
             // Sprawdzanie HWID
@@ -52,7 +73,6 @@ export default async function handler(req, res) {
                 await hwidLogsCollection.insertOne({ hwid, key: script_key, status: 'hwid_mismatch', timestamp: new Date() });
                 return res.status(403).json({ success: false, error: 'invalid_hwid' });
             } else if (!keyData.hwid) {
-                // Przypisujemy HWID przy pierwszym użyciu
                 await keysCollection.updateOne({ _id: keyData._id }, { $set: { hwid: hwid } });
             }
 
