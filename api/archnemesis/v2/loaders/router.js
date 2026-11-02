@@ -30,37 +30,28 @@ export default async function handler(req, res) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archnemesis - Script Not Found</title>
+    <title>Script Not Found</title>
     <style>
-        body { background-color: #020203; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-image: radial-gradient(circle at center, rgba(255, 46, 99, 0.1) 0%, transparent 60%); }
-        .container { text-align: center; background: rgba(15, 18, 25, 0.9); padding: 50px 40px; border-radius: 16px; border: 1px solid rgba(255, 46, 99, 0.3); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(255, 46, 99, 0.15); max-width: 500px; width: 100%; }
-        .icon { font-size: 50px; color: #ff2e63; margin-bottom: 20px; text-shadow: 0 0 20px rgba(255, 46, 99, 0.5); }
-        h1 { color: #ff2e63; margin-bottom: 10px; font-size: 24px; text-transform: uppercase; letter-spacing: 2px; }
-        p { color: #8a93a6; font-size: 15px; line-height: 1.6; margin-bottom: 30px; }
-        .status-box { background: rgba(0, 0, 0, 0.5); padding: 15px; border-radius: 8px; border: 1px solid #1a1f2b; font-family: 'Consolas', monospace; color: #ff2e63; font-size: 14px; }
-        .btn { display: inline-block; margin-top: 30px; padding: 12px 30px; background: #ff2e63; color: #fff; text-decoration: none; border-radius: 6px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
-        .btn:hover { background: #fff; color: #ff2e63; box-shadow: 0 0 15px #ff2e63; }
+        body { background-color: #020203; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { text-align: center; background: rgba(255, 46, 99, 0.1); padding: 40px; border-radius: 12px; border: 1px solid #ff2e63; }
+        h1 { color: #ff2e63; }
+        p { color: #8a93a6; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="icon">⚠️</div>
-        <h1>Script Not Found</h1>
-        <p>The requested script does not exist in our database or has been temporarily removed.</p>
-        <div class="status-box">Requested File: ${file}</div>
-        <a href="https://discord.gg/S3PJ37MfPG" class="btn">Join Discord for Support</a>
+        <h1>⚠️ Script Not Found</h1>
+        <p>The requested script (${file}) does not exist.</p>
     </div>
 </body>
-</html>
-                `);
+</html>`);
             }
             res.setHeader('Content-Type', 'text/plain');
-            return res.status(404).send('-- Error: Script not found in database');
+            return res.status(404).send('-- Error: Script not found');
         }
 
         // ==========================================
-        // WIDOK DLA PRZEGLĄDARKI (GŁÓWNY LOADER HTML)
+        // WIDOK DLA PRZEGLĄDARKI
         // ==========================================
         if (isBrowser) {
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -69,29 +60,25 @@ export default async function handler(req, res) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archnemesis - ${scriptType.toUpperCase()} Loader</title>
     <style>
-        body { background-color: #020203; color: #fff; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background-image: radial-gradient(circle at center, rgba(0, 229, 255, 0.1) 0%, transparent 60%); }
-        .container { text-align: center; background: rgba(15, 18, 25, 0.9); padding: 40px; border-radius: 16px; border: 1px solid rgba(0, 229, 255, 0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 30px rgba(0, 229, 255, 0.15); max-width: 700px; width: 100%; }
-        h1 { color: #00e5ff; margin-bottom: 8px; font-size: 26px; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 15px rgba(0, 229, 255, 0.5); }
-        p { color: #8a93a6; margin-bottom: 30px; font-size: 15px; }
-        .code-container { background: #000; border-radius: 10px; border: 1px solid #1a1f2b; text-align: left; position: relative; overflow: hidden; }
-        .code-header { background: #0a0c10; padding: 10px 20px; border-bottom: 1px solid #1a1f2b; display: flex; justify-content: space-between; align-items: center; }
-        .code-title { color: #8a93a6; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
-        .copy-btn { background: #00e5ff; color: #000; border: none; padding: 8px 20px; border-radius: 6px; font-weight: 800; font-size: 12px; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
-        .copy-btn:hover { background: #fff; box-shadow: 0 0 15px #00e5ff; }
-        .code-content { padding: 25px 20px; font-family: 'Consolas', 'Fira Code', monospace; color: #00ffaa; font-size: 14px; line-height: 1.8; white-space: pre-wrap; word-break: break-all; }
+        body { background-color: #020203; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-image: radial-gradient(circle at center, rgba(0, 229, 255, 0.1) 0%, transparent 60%); }
+        .container { text-align: center; background: rgba(15, 18, 25, 0.9); padding: 40px; border-radius: 16px; border: 1px solid rgba(0, 229, 255, 0.2); max-width: 700px; width: 100%; }
+        h1 { color: #00e5ff; text-transform: uppercase; letter-spacing: 3px; }
+        p { color: #8a93a6; }
+        .code-container { background: #000; border-radius: 10px; border: 1px solid #1a1f2b; text-align: left; }
+        .code-header { background: #0a0c10; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #1a1f2b; }
+        .copy-btn { background: #00e5ff; color: #000; border: none; padding: 8px 20px; border-radius: 6px; font-weight: 800; cursor: pointer; }
+        .code-content { padding: 25px 20px; font-family: monospace; color: #00ffaa; font-size: 14px; line-height: 1.8; word-break: break-all; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>${scriptType.toUpperCase()} LOADER</h1>
         <p>Copy the code below and execute it in your Roblox executor.</p>
-        
         <div class="code-container">
             <div class="code-header">
-                <span class="code-title">Roblox Script</span>
+                <span style="color:#8a93a6;font-size:12px;">ROBLOX SCRIPT</span>
                 <button class="copy-btn" onclick="copyCode(this)">Copy Code</button>
             </div>
             <div class="code-content" id="fullCode">script_key="_YOUR_SCRIPT_KEY_HERE";
@@ -102,47 +89,37 @@ loadstring(game:HttpGet("https://projectarch.vercel.app/api/archnemesis/v2/loade
         function copyCode(btn) {
             const code = document.getElementById('fullCode').innerText;
             navigator.clipboard.writeText(code).then(() => {
-                const original = btn.innerText;
                 btn.innerText = 'Copied!';
-                btn.style.background = '#00ffaa';
-                setTimeout(() => { btn.innerText = original; btn.style.background = '#00e5ff'; }, 2000);
+                setTimeout(() => { btn.innerText = 'Copy Code'; }, 2000);
             });
         }
     </script>
 </body>
-</html>
-            `);
+</html>`);
         }
 
         // ==========================================
-        // WIDOK DLA ROBLOX (ANTI-TAMPER + CZYSTY KOD LUA)
+        // WIDOK DLA ROBLOX (FAZA 1 - POBRANIE STATIC CONTENT)
         // ==========================================
-        
-        // Ten kod jest generowany dynamicznie i odsyłany do game:HttpGet w Roblox
-        const luaLoader = `
--- ==========================================
--- ANTI-HOOK CHECK
--- ==========================================
-local function checkHooks()
-    local info = debug.getinfo(loadstring)
-    if info.what ~= "C" then
-        -- Wykryto hooka na loadstring (np. ArN Minimal Hook)
-        request({
-            Url = "https://projectarch.vercel.app/api/archnemesis/v2/keys/router?action=ban&script_key=" .. script_key .. "&hwid=test-hwid&reason=Loadstring_Hook",
-            Method = "GET"
-        })
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/tamper.lua"))()
-        return false
-    end
-    return true
-end
+        // Ustalamy, który plik static_content ma pobrać loader
+        let staticFile = "static_content_1"; // free
+        if (scriptType === "premium") staticFile = "static_content_2";
+        if (scriptType === "beta") staticFile = "static_content_3";
 
-if checkHooks() then
-    ${scriptData.Script}
+        // Generujemy kod Lua, który pobierze odpowiedni plik z GitHuba (Raw)
+        const luaLoader = `
+-- Archnemesis Faza 1: Pobieranie Static Content
+local static_url = "https://raw.githubusercontent.com/TWOJ_NICK/projectarch/main/static_content/${staticFile}.lua"
+
+local success, err = pcall(function()
+    loadstring(game:HttpGet(static_url, true))()
+end)
+
+if not success then
+    warn("[Archnemesis] Failed to load static content: " .. tostring(err))
 end
         `;
 
-        // Zwracamy gotowy, wygenerowany kod Lua dla Robloxa
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         return res.status(200).send(luaLoader);
 
