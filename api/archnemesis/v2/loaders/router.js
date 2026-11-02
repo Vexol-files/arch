@@ -105,7 +105,7 @@ loadstring(game:HttpGet("https://projectarch.vercel.app/api/archnemesis/v2/loade
         // Generujemy unikalny token dla tego uruchomienia
         const runToken = crypto.randomBytes(16).toString('hex');
 
-        // Zapisujemy token w bazie (opcjonalnie, ale bezpieczniej)
+        // Zapisujemy token w bazie
         await db.collection('run_tokens').insertOne({
             token: runToken,
             script_type: scriptType,
@@ -113,8 +113,13 @@ loadstring(game:HttpGet("https://projectarch.vercel.app/api/archnemesis/v2/loade
             used: false
         });
 
-        // Zwracamy bardzo krótki kod, który pobiera 10 000 linii z generate_loader
+        // --- TO JEST KLUCZOWA POPRAWKA ---
+        // Wysyłamy kod, który najpierw sprawdza, czy użytkownik podał script_key,
+        // a jeśli tak, to przypisuje go do _G["script_key"] przed odpaleniem reszty.
         const luaLoader = `
+if script_key then
+    _G["script_key"] = script_key
+end
 _G["_ArN_Token"] = "${runToken}"
 local _gen_url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/generate_loader?token=${runToken}"
 local _gen_code = game:HttpGet(_gen_url, true)
