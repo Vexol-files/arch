@@ -1,45 +1,71 @@
--- static_content/stage4.lua
+-- static_content/stage4.lua (WIELKI ANTI-TAMPER)
 local _req = syn and syn.request or http_request or request
-local KICK_TAMPER = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/tamper1.lua"
+local _key = _G["script_key"] or "unknown"
+local _hwid = (gethwid and gethwid()) or (syn and syn.get_hwid and syn:get_hwid()) or (game.Players.LocalPlayer.UserId .. "_" .. game.Players.LocalPlayer.Name)
 
--- Test 1: Sprawdzamy, czy loadstring zwraca prawidłowy wynik
-local testCode = "return 1 + 1"
-local success, result = pcall(function()
-    local fn = loadstring(testCode)
-    if type(fn) ~= "function" then
-        error("loadstring didn't return a function")
-    end
-    return fn()
+-- Funkcja do wysyłania bana
+local function triggerBan(reason)
+    local _ban_url = "https://projectarch.vercel.app/api/archnemesis/v2/keys/router?action=ban&reason=" .. reason .. "&script_key=" .. _key .. "&hwid=" .. _hwid
+    pcall(function() _req({Url = _ban_url, Method = "GET"}) end)
+    
+    -- Pobieramy odpowiedni kick
+    local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/" .. (reason == "Tamper_1" and "tamper1.lua" or (reason == "Tamper_2" and "tamper2.lua" or "tamper3.lua"))
+    local _kick = _req({Url = kickUrl, Method = "GET"})
+    pcall(function() loadstring(_kick.Body)() end)
+end
+
+-- ==========================================
+-- TEST 1: LOADSTRING (Tamper_1 - 24h)
+-- ==========================================
+local ok, res = pcall(function()
+    local fn = loadstring("return 1337")
+    return fn and fn()
 end)
-
-if not success or result ~= 2 then
-    -- Wykryto hooka na loadstring!
-    local _kick = _req({Url = KICK_TAMPER, Method = "GET"})
-    loadstring(_kick.Body)()
+if not ok or res ~= 1337 or debug.getinfo(loadstring).what ~= "C" then
+    triggerBan("Tamper_1")
     return
 end
 
--- Test 2: Sprawdzamy, czy print nie jest zahookowany
-local printSuccess, printResult = pcall(function()
-    print("Anti-Tamper Test")
+-- ==========================================
+-- TEST 2: PRINT (Tamper_2 - 7 dni)
+-- ==========================================
+local printOk, printRes = pcall(function()
+    print("Anti-Tamper")
     return true
 end)
-
-if not printSuccess then
-    local _kick = _req({Url = KICK_TAMPER, Method = "GET"})
-    loadstring(_kick.Body)()
+if not printOk or debug.getinfo(print).what ~= "C" then
+    triggerBan("Tamper_2")
     return
 end
 
--- Test 3: Sprawdzamy debug.getinfo jako dodatkowe zabezpieczenie
-if debug.getinfo(loadstring).what ~= "C" then
-    local _kick = _req({Url = KICK_TAMPER, Method = "GET"})
-    loadstring(_kick.Body)()
+-- ==========================================
+-- TEST 3: REQUEST / GAME:HTTPGET (Tamper_3 - 30 dni)
+-- ==========================================
+-- Sprawdzamy, czy request nie jest podmieniony
+if syn and syn.request and debug.getinfo(syn.request).what ~= "C" then
+    triggerBan("Tamper_3")
     return
 end
 
--- 4. Jeśli wszystko OK, idziemy dalej
+-- Sprawdzamy, czy game:HttpGet nie jest podmienione
+if debug.getinfo(game.HttpGet).what ~= "C" then
+    triggerBan("Tamper_3")
+    return
+end
+
+-- Sprawdzamy, czy debug.getinfo samo w sobie nie jest podmienione (najgroźniejszy hook)
+if debug.getinfo(debug.getinfo).what ~= "C" then
+    triggerBan("Tamper_3")
+    return
+end
+
+-- ==========================================
+-- SUKCES - Idziemy dalej
+-- ==========================================
 _G["_ArN_Stage4"] = true
-local _next_url = "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/static_content/stage5.lua"
+_G["_ArN_Stage5"] = true
+_G["_ArN_Stage6"] = true
+
+local _next_url = "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/static_content/stage7.lua"
 local _next_res = _req({Url = _next_url, Method = "GET"})
 pcall(function() loadstring(_next_res.Body)() end)
