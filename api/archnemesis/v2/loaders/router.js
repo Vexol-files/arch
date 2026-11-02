@@ -131,13 +131,12 @@ local function checkHooks()
             Url = "https://projectarch.vercel.app/api/archnemesis/v2/keys/router?action=ban&script_key=" .. script_key .. "&hwid=test-hwid&reason=Loadstring_Hook",
             Method = "GET"
         })
-        game.Players.LocalPlayer:Kick("Anti-Tamper: Hooking Detected")
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/tamper.lua"))()
         return false
     end
     return true
 end
 
--- Uruchamiamy test, jeśli przejdzie, ładujemy właściwy kod z bazy
 if checkHooks() then
     ${scriptData.Script}
 end
