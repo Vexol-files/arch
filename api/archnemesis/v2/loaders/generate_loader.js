@@ -11,7 +11,10 @@ export default async function handler(req, res) {
         const db = client.db('loader_system');
         const sessionsCollection = db.collection('sessions');
 
+        // Generujemy ID sesji dla dalszych etapów
         const sessionId = crypto.randomBytes(16).toString('hex');
+
+        // Generujemy mapę tokenów dla Stage 2-6 (będą one szyfrowane)
         const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{};':\",./<>?\\|`~ ";
         const tokenMap = {};
         const reverseMap = {};
@@ -28,54 +31,34 @@ export default async function handler(req, res) {
             session_id: sessionId,
             token_map: reverseMap,
             created_at: new Date(),
-            expires_at: new Date(Date.now() + 5 * 1000),
+            expires_at: new Date(Date.now() + 5 * 60 * 1000),
             used_stages: []
         });
 
-        // Stage 1 - tutaj odszyfrowujemy przez _realLoadstring
-        const stage1Code = `
+        // Prawdziwy kod Stage 1 (bez szyfrowania tokenami, żeby ArN Hook go nie zablokował)
+        let loaderCode = `
+_G["_ArN_Session"] = "${sessionId}"
 local _req = syn and syn.request or http_request or request
-local _sess = "${sessionId}"
-local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _sess, Method = "GET"})
+local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _G["_ArN_Session"], Method = "GET"})
 loadstring(_next.Body)()
-        `;
+`;
 
-        let encryptedLua = "";
-        for (let i = 0; i < stage1Code.length; i++) {
-            const char = stage1Code[i];
-            encryptedLua += tokenMap[char] || char;
+        // --- GENEROWANIE 10 000 LINII ŚMIECI ---
+        for (let i = 0; i < 10000; i++) {
+            const type = Math.floor(Math.random() * 4);
+            if (type === 0) {
+                loaderCode += `local _junk_var_${i} = ${Math.floor(Math.random() * 9999)} * math.cos(${Math.random()})\n`;
+            } else if (type === 1) {
+                loaderCode += `local _junk_var_${i} = 0\nif _junk_var_${i} % ${Math.floor(Math.random() * 5) + 2} == 0 then _G["_fake_${i}"] = string.rep("X", ${Math.floor(Math.random() * 20)}) end\n`;
+            } else if (type === 2) {
+                loaderCode += `for _loop_${i} = 1, ${Math.floor(Math.random() * 3)} do _G["_dummy_${i}"] = (_G["_dummy_${i}"] or 0) + _loop_${i} end\n`;
+            } else {
+                loaderCode += `local function _fake_func_${i}() return ${Math.random()} + ${Math.floor(Math.random() * 100)} end local _ = _fake_func_${i}()\n`;
+            }
         }
 
-        const finalLoader = `
-_G["_ArN_Session"] = "${sessionId}"
-local _encrypted = [[${encryptedLua}]]
-local _req = syn and syn.request or http_request or request
-
--- Bierzemy oryginalny loadstring z pamięci, zanim hook go podmieni
-local _realLoadstring = loadstring
-if debug.getinfo(loadstring).what ~= "C" then
-    for k, v in pairs(_G) do
-        if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
-            _realLoadstring = v
-            break
-        end
-    end
-end
-
-local _res = _req({Url="https://projectarch.vercel.app/api/archnemesis/v2/script/temp/map?sess=${sessionId}", Method="GET"})
-local _map = game:GetService("HttpService"):JSONDecode(_res.Body)
-for token, char in pairs(_map) do
-    _encrypted = _encrypted:gsub(token:gsub("%[","%%["):gsub("%]","%%]"), char)
-end
-
--- Uruchamiamy przez _realLoadstring
-pcall(function()
-    _realLoadstring(_encrypted)()
-end)
-        `;
-
         res.setHeader('Content-Type', 'text/plain');
-        return res.status(200).send(finalLoader);
+        return res.status(200).send(loaderCode);
 
     } catch (error) {
         res.status(500).send('Error');
