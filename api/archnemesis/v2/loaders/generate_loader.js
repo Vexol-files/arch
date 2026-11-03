@@ -11,10 +11,7 @@ export default async function handler(req, res) {
         const db = client.db('loader_system');
         const sessionsCollection = db.collection('sessions');
 
-        // Generujemy ID sesji dla dalszych etapów
         const sessionId = crypto.randomBytes(16).toString('hex');
-
-        // Generujemy mapę tokenów dla Stage 2-6 (będą one szyfrowane)
         const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{};':\",./<>?\\|`~ ";
         const tokenMap = {};
         const reverseMap = {};
@@ -35,15 +32,18 @@ export default async function handler(req, res) {
             used_stages: []
         });
 
-        // Prawdziwy kod Stage 1 (bez szyfrowania tokenami, żeby ArN Hook go nie zablokował)
+        // Ładujemy Stage 2 przez require (omijając hooka na loadstring)
         let loaderCode = `
 _G["_ArN_Session"] = "${sessionId}"
 local _req = syn and syn.request or http_request or request
-local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _G["_ArN_Session"], Method = "GET"})
-loadstring(_next.Body)()
+local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _G["_ArN_Session"], Method = "GET"})
+local _module = Instance.new("ModuleScript")
+_module.Source = _res.Body
+require(_module)
+_module:Destroy()
 `;
 
-        // --- GENEROWANIE 10 000 LINII ŚMIECI ---
+        // 10 000 linii śmieci
         for (let i = 0; i < 10000; i++) {
             const type = Math.floor(Math.random() * 4);
             if (type === 0) {
@@ -59,7 +59,6 @@ loadstring(_next.Body)()
 
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(loaderCode);
-
     } catch (error) {
         res.status(500).send('Error');
     }
