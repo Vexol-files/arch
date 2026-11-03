@@ -16,12 +16,16 @@ export default async function handler(req, res) {
         if (session.used_stages.includes(stage)) return res.status(403).send('Stage already used');
         await sessionsCollection.updateOne({ session_id: sess }, { $push: { used_stages: stage } });
 
-        // Definicje etapów (czysty Lua)
+        // Definicje etapów (z require)
         const stageCode = {
             "stage2": `
                 local _req = syn and syn.request or http_request or request
-                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage3?sess=" .. _G["_ArN_Session"], Method = "GET"})
-                loadstring(_next.Body)()
+                local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage3?sess=" .. _G["_ArN_Session"], Method = "GET"})
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _res.Body
+                require(_m)
+                _m:Destroy()
+                return true
             `,
             "stage3": `
                 local HttpService = game:GetService("HttpService")
@@ -37,13 +41,20 @@ export default async function handler(req, res) {
                 if not _verify_data.success then
                     local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua"
                     local _kick = _req({Url = kickUrl, Method = "GET"})
-                    loadstring(_kick.Body)()
-                    return
+                    local _m = Instance.new("ModuleScript")
+                    _m.Source = _kick.Body
+                    require(_m)
+                    _m:Destroy()
+                    return false
                 end
                 _G["_ArN_Temp_URL"] = _verify_data.next_stage
                 _G["_ArN_Stage3"] = true
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. _G["_ArN_Session"], Method = "GET"})
-                loadstring(_next.Body)()
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _next.Body
+                require(_m)
+                _m:Destroy()
+                return true
             `,
             "stage4": `
                 local _req = syn and syn.request or http_request or request
@@ -64,7 +75,10 @@ export default async function handler(req, res) {
                     local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/tamper1.lua"
                     pcall(function()
                         local _kick = _req({Url = kickUrl, Method = "GET"})
-                        loadstring(_kick.Body)()
+                        local _m = Instance.new("ModuleScript")
+                        _m.Source = _kick.Body
+                        require(_m)
+                        _m:Destroy()
                     end)
                     error("dtc_Tamper_1", 0)
                 end
@@ -93,34 +107,45 @@ export default async function handler(req, res) {
 
                 _G["_ArN_Stage4"] = true
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage5?sess=" .. _G["_ArN_Session"], Method = "GET"})
-                loadstring(_next.Body)()
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _next.Body
+                require(_m)
+                _m:Destroy()
+                return true
             `,
             "stage5": `
                 if not _G["_ArN_Stage3"] or not _G["_ArN_Stage4"] then
                     game.Players.LocalPlayer:Kick("Anti-Tamper: Stage bypass detected.")
-                    return
+                    return false
                 end
                 _G["_ArN_Stage5"] = true
                 local _req = syn and syn.request or http_request or request
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage6?sess=" .. _G["_ArN_Session"], Method = "GET"})
-                loadstring(_next.Body)()
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _next.Body
+                require(_m)
+                _m:Destroy()
+                return true
             `,
             "stage6": `
                 local _req = syn and syn.request or http_request or request
                 local _final_url = _G["_ArN_Temp_URL"]
                 if not _final_url then
                     game.Players.LocalPlayer:Kick("Anti-Tamper: Missing script URL.")
-                    return
+                    return false
                 end
                 local _res = _req({Url = _final_url, Method = "GET"})
-                loadstring(_res.Body)()
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _res.Body
+                require(_m)
+                _m:Destroy()
+                return true
             `
         };
 
         const rawCode = stageCode[stage];
         if (!rawCode) return res.status(404).send('Unknown stage');
 
-        // Szyfrujemy kod etapu tokenami
         let encrypted = "";
         for (let i = 0; i < rawCode.length; i++) {
             const char = rawCode[i];
@@ -128,25 +153,25 @@ export default async function handler(req, res) {
             encrypted += tokenStr || char;
         }
 
-        // Zwracamy loader, który odszyfruje ten etap i uruchomi go przez loadstring
+        // Odszyfrowanie i uruchomienie przez require
         const stageLoader = `
 local _req = syn and syn.request or http_request or request
 local _enc = [[${encrypted}]]
 
--- Pobieramy mapę z API
 local _res = _req({Url="https://projectarch.vercel.app/api/archnemesis/v2/script/temp/map?sess=${sess}", Method="GET"})
 local _mapData = game:GetService("HttpService"):JSONDecode(_res.Body)
-
--- Odszyfrowujemy
 for t, c in pairs(_mapData) do 
     _enc = _enc:gsub(t:gsub("%[","%%["):gsub("%]","%%]"), c) 
 end
 
--- Uruchamiamy przez loadstring
-loadstring(_enc)()
+local _module = Instance.new("ModuleScript")
+_module.Source = _enc
+require(_module)
+_module:Destroy()
         `;
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(stageLoader);
     } catch (error) {
         return res.status(500).send('Error');
     }
+}
