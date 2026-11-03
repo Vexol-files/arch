@@ -16,18 +16,18 @@ export default async function handler(req, res) {
         if (session.used_stages.includes(stage)) return res.status(403).send('Stage already used');
         await sessionsCollection.updateOne({ session_id: sess }, { $push: { used_stages: stage } });
 
-        // Definicje etapów (czysty kod Lua)
         const stageCode = {
             "stage2": `
                 local _req = syn and syn.request or http_request or request
-                local _sess = _G["_ArN_Session"]
-                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage3?sess=" .. _sess, Method = "GET"})
-                loadstring(_next.Body)()
+                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage3?sess=" .. _G["_ArN_Session"], Method = "GET"})
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _next.Body
+                require(_m)
+                _m:Destroy()
             `,
             "stage3": `
                 local HttpService = game:GetService("HttpService")
                 local _req = syn and syn.request or http_request or request
-                local _sess = _G["_ArN_Session"]
                 local _script_key = _G["script_key"]
                 local _j1 = _G["_ArN_Json1"]
                 local _data1 = HttpService:JSONDecode(readfile(_j1))
@@ -39,13 +39,19 @@ export default async function handler(req, res) {
                 if not _verify_data.success then
                     local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua"
                     local _kick = _req({Url = kickUrl, Method = "GET"})
-                    loadstring(_kick.Body)()
+                    local _m = Instance.new("ModuleScript")
+                    _m.Source = _kick.Body
+                    require(_m)
+                    _m:Destroy()
                     return
                 end
                 _G["_ArN_Temp_URL"] = _verify_data.next_stage
                 _G["_ArN_Stage3"] = true
-                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. _sess, Method = "GET"})
-                loadstring(_next.Body)()
+                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. _G["_ArN_Session"], Method = "GET"})
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _next.Body
+                require(_m)
+                _m:Destroy()
             `,
             "stage4": `
                 local _req = syn and syn.request or http_request or request
@@ -66,7 +72,10 @@ export default async function handler(req, res) {
                     local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/tamper1.lua"
                     pcall(function()
                         local _kick = _req({Url = kickUrl, Method = "GET"})
-                        loadstring(_kick.Body)()
+                        local _m = Instance.new("ModuleScript")
+                        _m.Source = _kick.Body
+                        require(_m)
+                        _m:Destroy()
                     end)
                     error("dtc_Tamper_1", 0)
                 end
@@ -94,9 +103,11 @@ export default async function handler(req, res) {
                 end
 
                 _G["_ArN_Stage4"] = true
-                local _sess = _G["_ArN_Session"]
-                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage5?sess=" .. _sess, Method = "GET"})
-                loadstring(_next.Body)()
+                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage5?sess=" .. _G["_ArN_Session"], Method = "GET"})
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _next.Body
+                require(_m)
+                _m:Destroy()
             `,
             "stage5": `
                 if not _G["_ArN_Stage3"] or not _G["_ArN_Stage4"] then
@@ -105,9 +116,11 @@ export default async function handler(req, res) {
                 end
                 _G["_ArN_Stage5"] = true
                 local _req = syn and syn.request or http_request or request
-                local _sess = _G["_ArN_Session"]
-                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage6?sess=" .. _sess, Method = "GET"})
-                loadstring(_next.Body)()
+                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage6?sess=" .. _G["_ArN_Session"], Method = "GET"})
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _next.Body
+                require(_m)
+                _m:Destroy()
             `,
             "stage6": `
                 local _req = syn and syn.request or http_request or request
@@ -117,14 +130,16 @@ export default async function handler(req, res) {
                     return
                 end
                 local _res = _req({Url = _final_url, Method = "GET"})
-                loadstring(_res.Body)()
+                local _m = Instance.new("ModuleScript")
+                _m.Source = _res.Body
+                require(_m)
+                _m:Destroy()
             `
         };
 
         const rawCode = stageCode[stage];
         if (!rawCode) return res.status(404).send('Unknown stage');
 
-        // Szyfrujemy kod etapu (Stage 2-6) tokenami
         let encrypted = "";
         for (let i = 0; i < rawCode.length; i++) {
             const char = rawCode[i];
@@ -132,29 +147,19 @@ export default async function handler(req, res) {
             encrypted += tokenStr || char;
         }
 
-        // Zwracamy loader, który odszyfruje ten etap i go uruchomi
+        // Zwracamy loader z require, aby odszyfrować i uruchomić kod
         const stageLoader = `
 local _req = syn and syn.request or http_request or request
 local _enc = [[${encrypted}]]
-
--- Bierzemy oryginalny loadstring z pamięci (zanim hook go podmieni)
-local _realLoadstring = loadstring
-if debug.getinfo(loadstring).what ~= "C" then
-    for k, v in pairs(_G) do
-        if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
-            _realLoadstring = v
-            break
-        end
-    end
-end
 
 local _res = _req({Url="https://projectarch.vercel.app/api/archnemesis/v2/script/temp/map?sess=${sess}", Method="GET"})
 local _map = game:GetService("HttpService"):JSONDecode(_res.Body)
 for t, c in pairs(_map) do _enc = _enc:gsub(t:gsub("%[","%%["):gsub("%]","%%]"), c) end
 
-pcall(function()
-    _realLoadstring(_enc)()
-end)
+local _module = Instance.new("ModuleScript")
+_module.Source = _enc
+require(_module)
+_module:Destroy()
         `;
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(stageLoader);
