@@ -16,7 +16,6 @@ export default async function handler(req, res) {
         if (session.used_stages.includes(stage)) return res.status(403).send('Stage already used');
         await sessionsCollection.updateOne({ session_id: sess }, { $push: { used_stages: stage } });
 
-        // Definicje etapów (z require)
         const stageCode = {
             "stage2": `
                 local _req = syn and syn.request or http_request or request
@@ -153,7 +152,6 @@ export default async function handler(req, res) {
             encrypted += tokenStr || char;
         }
 
-        // Odszyfrowanie i uruchomienie przez require
         const stageLoader = `
 local _req = syn and syn.request or http_request or request
 local _enc = [[${encrypted}]]
