@@ -40,9 +40,18 @@ export default async function handler(req, res) {
                 local _verify_url = _api_url .. "?action=verify_key&script_key=" .. _script_key .. "&hwid=" .. _hwid
                 local _res = _req({Url = _verify_url, Method = "GET"})
                 local _verify_data = HttpService:JSONDecode(_res.Body)
+                
                 if not _verify_data.success then
-                    local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua"
-                    local _kick = _req({Url = kickUrl, Method = "GET"})
+                    local _kickUrl = ""
+                    if _verify_data.error == "banned" then
+                        _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/blacklist.lua"
+                    elseif _verify_data.error == "invalid_hwid" then
+                        _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/hwid.lua"
+                    else
+                        _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua"
+                    end
+                    
+                    local _kick = _req({Url = _kickUrl, Method = "GET"})
                     local _realLoadstring = loadstring
                     for k, v in pairs(_G) do
                         if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
@@ -53,6 +62,7 @@ export default async function handler(req, res) {
                     _realLoadstring(_kick.Body)()
                     return
                 end
+                
                 _G["_ArN_Temp_URL"] = _verify_data.next_stage
                 _G["_ArN_Stage3"] = true
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. _G["_ArN_Session"], Method = "GET"})
