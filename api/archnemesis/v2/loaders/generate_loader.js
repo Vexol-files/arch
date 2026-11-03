@@ -11,30 +11,23 @@ export default async function handler(req, res) {
         const db = client.db('loader_system');
         const sessionsCollection = db.collection('sessions');
 
-        const sessionId = crypto.randomBytes(16).toString('hex');
+        // 1. Generujemy losowe ID dla znaków (np. arch.4188)
         const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{};':\",./<>?\\|`~ ";
         const tokenMap = {};
-        const reverseMap = {};
         
         for (let i = 0; i < charset.length; i++) {
             const char = charset[i];
-            const randomHex = crypto.randomBytes(4).toString('hex');
-            const tokenStr = `[arch.${randomHex}]`;
-            tokenMap[char] = tokenStr;
-            reverseMap[tokenStr] = char;
+            const randomId = "arch." + Math.floor(1000 + Math.random() * 9000);
+            tokenMap[char] = randomId;
         }
 
-        await sessionsCollection.insertOne({
-            session_id: sessionId,
-            token_map: reverseMap,
-            created_at: new Date(),
-            expires_at: new Date(Date.now() + 5 * 60 * 1000),
-            used_stages: []
-        });
+        // 2. Zapisujemy mapę w pamięci Robloxa (jako JSON w _G)
+        const mapJson = JSON.stringify(tokenMap);
 
-        // Ładujemy Stage 2 przez require (omijając hooka na loadstring)
+        // 3. Kod Stage 1, który ładuje Stage 2
         let loaderCode = `
-_G["_ArN_Session"] = "${sessionId}"
+_G["_ArN_CharMap"] = ${mapJson}
+_G["_ArN_Session"] = "${crypto.randomBytes(16).toString('hex')}"
 local _req = syn and syn.request or http_request or request
 local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _G["_ArN_Session"], Method = "GET"})
 local _module = Instance.new("ModuleScript")
@@ -43,7 +36,7 @@ require(_module)
 _module:Destroy()
 `;
 
-        // 10 000 linii śmieci
+        // 4. Dodajemy 10 000 linii śmieci
         for (let i = 0; i < 10000; i++) {
             const type = Math.floor(Math.random() * 4);
             if (type === 0) {
@@ -59,6 +52,7 @@ _module:Destroy()
 
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(loaderCode);
+
     } catch (error) {
         res.status(500).send('Error');
     }
