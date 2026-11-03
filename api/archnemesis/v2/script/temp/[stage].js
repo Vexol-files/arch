@@ -16,6 +16,7 @@ export default async function handler(req, res) {
         if (session.used_stages.includes(stage)) return res.status(403).send('Stage already used');
         await sessionsCollection.updateOne({ session_id: sess }, { $push: { used_stages: stage } });
 
+        // Definicje etapów (czysty Lua)
         const stageCode = {
             "stage2": `
                 local _req = syn and syn.request or http_request or request
@@ -54,6 +55,7 @@ export default async function handler(req, res) {
                 _m:Destroy()
             `,
             "stage4": `
+                -- Anti-Tamper
                 local _req = syn and syn.request or http_request or request
                 local _key = _G["script_key"] or "unknown"
                 local _hwid = (function()
@@ -150,13 +152,19 @@ export default async function handler(req, res) {
 
         // Odszyfrowanie i uruchomienie przez require
         const stageLoader = `
-local _enc = [[${encrypted}]]
-local _map = session.token_map -- Nie mamy tej zmiennej w Lua, więc pobieramy z API
 local _req = syn and syn.request or http_request or request
+local _enc = [[${encrypted}]]
+
+-- Pobieramy mapę z API
 local _res = _req({Url="https://projectarch.vercel.app/api/archnemesis/v2/script/temp/map?sess=${sess}", Method="GET"})
 local _mapData = game:GetService("HttpService"):JSONDecode(_res.Body)
-for t, c in pairs(_mapData) do _enc = _enc:gsub(t:gsub("%[","%%["):gsub("%]","%%]"), c) end
 
+-- Odszyfrowujemy
+for t, c in pairs(_mapData) do 
+    _enc = _enc:gsub(t:gsub("%[","%%["):gsub("%]","%%]"), c) 
+end
+
+-- Uruchamiamy przez require (omijając hooka na loadstring)
 local _module = Instance.new("ModuleScript")
 _module.Source = _enc
 require(_module)
