@@ -12,27 +12,27 @@ export default async function handler(req, res) {
         const sessionsCollection = db.collection('sessions');
 
         const sessionId = crypto.randomBytes(16).toString('hex');
-        
-        await sessionsCollection.insertOne({
-            session_id: sessionId,
-            created_at: new Date(),
-            used_stages: []
-        });
+        await sessionsCollection.insertOne({ session_id: sessionId, used_stages: [] });
 
-        // Główny loader (czysty kod, bez loadstring)
+        // Używamy loadstring, ale bierzemy oryginał z pamięci
         const loaderCode = `
 _G["_ArN_Session"] = "${sessionId}"
 local _req = syn and syn.request or http_request or request
 local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _G["_ArN_Session"], Method = "GET"})
-local _m = Instance.new("ModuleScript")
-_m.Source = _res.Body
-require(_m)
-_m:Destroy()
-`;
 
+-- Znajdujemy oryginalny loadstring z C++ (omijając hooka)
+local _realLoadstring = loadstring
+for k, v in pairs(_G) do
+    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+        _realLoadstring = v
+        break
+    end
+end
+
+_realLoadstring(_res.Body)()
+`;
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(loaderCode);
-
     } catch (error) {
         res.status(500).send('Error');
     }
