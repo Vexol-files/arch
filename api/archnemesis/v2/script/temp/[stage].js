@@ -145,30 +145,9 @@ export default async function handler(req, res) {
         const rawCode = stageCode[stage];
         if (!rawCode) return res.status(404).send('Unknown stage');
 
-        let encrypted = "";
-        for (let i = 0; i < rawCode.length; i++) {
-            const char = rawCode[i];
-            const tokenStr = Object.keys(session.token_map).find(key => session.token_map[key] === char);
-            encrypted += tokenStr || char;
-        }
-
-        const stageLoader = `
-local _req = syn and syn.request or http_request or request
-local _enc = [[${encrypted}]]
-
-local _res = _req({Url="https://projectarch.vercel.app/api/archnemesis/v2/script/temp/map?sess=${sess}", Method="GET"})
-local _mapData = game:GetService("HttpService"):JSONDecode(_res.Body)
-for t, c in pairs(_mapData) do 
-    _enc = _enc:gsub(t:gsub("%[","%%["):gsub("%]","%%]"), c) 
-end
-
-local _module = Instance.new("ModuleScript")
-_module.Source = _enc
-require(_module)
-_module:Destroy()
-        `;
+        // Na razie bez szyfrowania tokenami, żeby przetestować, czy działa
         res.setHeader('Content-Type', 'text/plain');
-        return res.status(200).send(stageLoader);
+        return res.status(200).send(rawCode);
     } catch (error) {
         return res.status(500).send('Error');
     }
