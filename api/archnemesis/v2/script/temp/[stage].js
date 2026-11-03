@@ -20,11 +20,14 @@ export default async function handler(req, res) {
             "stage2": `
                 local _req = syn and syn.request or http_request or request
                 local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage3?sess=" .. _G["_ArN_Session"], Method = "GET"})
-                local _m = Instance.new("ModuleScript")
-                _m.Source = _res.Body
-                require(_m)
-                _m:Destroy()
-                return true
+                local _realLoadstring = loadstring
+                for k, v in pairs(_G) do
+                    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                        _realLoadstring = v
+                        break
+                    end
+                end
+                _realLoadstring(_res.Body)()
             `,
             "stage3": `
                 local HttpService = game:GetService("HttpService")
@@ -40,20 +43,27 @@ export default async function handler(req, res) {
                 if not _verify_data.success then
                     local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua"
                     local _kick = _req({Url = kickUrl, Method = "GET"})
-                    local _m = Instance.new("ModuleScript")
-                    _m.Source = _kick.Body
-                    require(_m)
-                    _m:Destroy()
-                    return false
+                    local _realLoadstring = loadstring
+                    for k, v in pairs(_G) do
+                        if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                            _realLoadstring = v
+                            break
+                        end
+                    end
+                    _realLoadstring(_kick.Body)()
+                    return
                 end
                 _G["_ArN_Temp_URL"] = _verify_data.next_stage
                 _G["_ArN_Stage3"] = true
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. _G["_ArN_Session"], Method = "GET"})
-                local _m = Instance.new("ModuleScript")
-                _m.Source = _next.Body
-                require(_m)
-                _m:Destroy()
-                return true
+                local _realLoadstring = loadstring
+                for k, v in pairs(_G) do
+                    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                        _realLoadstring = v
+                        break
+                    end
+                end
+                _realLoadstring(_next.Body)()
             `,
             "stage4": `
                 local _req = syn and syn.request or http_request or request
@@ -74,10 +84,14 @@ export default async function handler(req, res) {
                     local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/tamper1.lua"
                     pcall(function()
                         local _kick = _req({Url = kickUrl, Method = "GET"})
-                        local _m = Instance.new("ModuleScript")
-                        _m.Source = _kick.Body
-                        require(_m)
-                        _m:Destroy()
+                        local _realLoadstring = loadstring
+                        for k, v in pairs(_G) do
+                            if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                                _realLoadstring = v
+                                break
+                            end
+                        end
+                        _realLoadstring(_kick.Body)()
                     end)
                     error("dtc_Tamper_1", 0)
                 end
@@ -106,46 +120,55 @@ export default async function handler(req, res) {
 
                 _G["_ArN_Stage4"] = true
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage5?sess=" .. _G["_ArN_Session"], Method = "GET"})
-                local _m = Instance.new("ModuleScript")
-                _m.Source = _next.Body
-                require(_m)
-                _m:Destroy()
-                return true
+                local _realLoadstring = loadstring
+                for k, v in pairs(_G) do
+                    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                        _realLoadstring = v
+                        break
+                    end
+                end
+                _realLoadstring(_next.Body)()
             `,
             "stage5": `
                 if not _G["_ArN_Stage3"] or not _G["_ArN_Stage4"] then
                     game.Players.LocalPlayer:Kick("Anti-Tamper: Stage bypass detected.")
-                    return false
+                    return
                 end
                 _G["_ArN_Stage5"] = true
                 local _req = syn and syn.request or http_request or request
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage6?sess=" .. _G["_ArN_Session"], Method = "GET"})
-                local _m = Instance.new("ModuleScript")
-                _m.Source = _next.Body
-                require(_m)
-                _m:Destroy()
-                return true
+                local _realLoadstring = loadstring
+                for k, v in pairs(_G) do
+                    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                        _realLoadstring = v
+                        break
+                    end
+                end
+                _realLoadstring(_next.Body)()
             `,
             "stage6": `
                 local _req = syn and syn.request or http_request or request
                 local _final_url = _G["_ArN_Temp_URL"]
                 if not _final_url then
                     game.Players.LocalPlayer:Kick("Anti-Tamper: Missing script URL.")
-                    return false
+                    return
                 end
                 local _res = _req({Url = _final_url, Method = "GET"})
-                local _m = Instance.new("ModuleScript")
-                _m.Source = _res.Body
-                require(_m)
-                _m:Destroy()
-                return true
+                local _realLoadstring = loadstring
+                for k, v in pairs(_G) do
+                    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                        _realLoadstring = v
+                        break
+                    end
+                end
+                _realLoadstring(_res.Body)()
             `
         };
 
         const rawCode = stageCode[stage];
         if (!rawCode) return res.status(404).send('Unknown stage');
 
-        // Zwracamy kod etapu bez szyfrowania (na razie, żeby przetestować)
+        // Zwracamy czysty kod Lua (bez szyfrowania)
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(rawCode);
     } catch (error) {
