@@ -1,8 +1,6 @@
 import { MongoClient } from 'mongodb';
 import crypto from 'crypto';
-
-const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri);
+const client = new MongoClient(process.env.MONGODB_URI);
 
 export default async function handler(req, res) {
     const { token } = req.query;
@@ -13,10 +11,7 @@ export default async function handler(req, res) {
         const db = client.db('loader_system');
         const sessionsCollection = db.collection('sessions');
 
-        // 1. Generujemy ID sesji
         const sessionId = crypto.randomBytes(16).toString('hex');
-
-        // 2. Generujemy mapę tokenów
         const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{};':\",./<>?\\|`~ ";
         const tokenMap = {};
         const reverseMap = {};
@@ -29,16 +24,15 @@ export default async function handler(req, res) {
             reverseMap[tokenStr] = char;
         }
 
-        // 3. Zapisujemy sesję (ważna 5 sekund od pobrania mapy)
         await sessionsCollection.insertOne({
             session_id: sessionId,
             token_map: reverseMap,
             created_at: new Date(),
-            expires_at: new Date(Date.now() + 5 * 1000), // 5 sekund!
+            expires_at: new Date(Date.now() + 5 * 1000),
             used_stages: []
         });
 
-        // 4. Kod Stage 1 (czysty)
+        // Stage 1 - tutaj odszyfrowujemy przez _realLoadstring
         const stage1Code = `
 local _req = syn and syn.request or http_request or request
 local _sess = "${sessionId}"
@@ -46,24 +40,38 @@ local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/scr
 loadstring(_next.Body)()
         `;
 
-        // 5. Szyfrujemy
         let encryptedLua = "";
         for (let i = 0; i < stage1Code.length; i++) {
             const char = stage1Code[i];
             encryptedLua += tokenMap[char] || char;
         }
 
-        // 6. Odsyłamy do Robloxa
         const finalLoader = `
 _G["_ArN_Session"] = "${sessionId}"
 local _encrypted = [[${encryptedLua}]]
 local _req = syn and syn.request or http_request or request
+
+-- Bierzemy oryginalny loadstring z pamięci, zanim hook go podmieni
+local _realLoadstring = loadstring
+if debug.getinfo(loadstring).what ~= "C" then
+    for k, v in pairs(_G) do
+        if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+            _realLoadstring = v
+            break
+        end
+    end
+end
+
 local _res = _req({Url="https://projectarch.vercel.app/api/archnemesis/v2/script/temp/map?sess=${sessionId}", Method="GET"})
 local _map = game:GetService("HttpService"):JSONDecode(_res.Body)
 for token, char in pairs(_map) do
     _encrypted = _encrypted:gsub(token:gsub("%[","%%["):gsub("%]","%%]"), char)
 end
-loadstring(_encrypted)()
+
+-- Uruchamiamy przez _realLoadstring
+pcall(function()
+    _realLoadstring(_encrypted)()
+end)
         `;
 
         res.setHeader('Content-Type', 'text/plain');
