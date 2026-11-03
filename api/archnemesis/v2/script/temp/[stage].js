@@ -16,7 +16,6 @@ export default async function handler(req, res) {
         if (session.used_stages.includes(stage)) return res.status(403).send('Stage already used');
         await sessionsCollection.updateOne({ session_id: sess }, { $push: { used_stages: stage } });
 
-        // Definicje etapów (czysty Lua)
         const stageCode = {
             "stage2": `
                 local _req = syn and syn.request or http_request or request
@@ -25,6 +24,7 @@ export default async function handler(req, res) {
                 _m.Source = _next.Body
                 require(_m)
                 _m:Destroy()
+                return true
             `,
             "stage3": `
                 local HttpService = game:GetService("HttpService")
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
                     _m.Source = _kick.Body
                     require(_m)
                     _m:Destroy()
-                    return
+                    return false
                 end
                 _G["_ArN_Temp_URL"] = _verify_data.next_stage
                 _G["_ArN_Stage3"] = true
@@ -53,9 +53,9 @@ export default async function handler(req, res) {
                 _m.Source = _next.Body
                 require(_m)
                 _m:Destroy()
+                return true
             `,
             "stage4": `
-                -- Anti-Tamper
                 local _req = syn and syn.request or http_request or request
                 local _key = _G["script_key"] or "unknown"
                 local _hwid = (function()
@@ -110,11 +110,12 @@ export default async function handler(req, res) {
                 _m.Source = _next.Body
                 require(_m)
                 _m:Destroy()
+                return true
             `,
             "stage5": `
                 if not _G["_ArN_Stage3"] or not _G["_ArN_Stage4"] then
                     game.Players.LocalPlayer:Kick("Anti-Tamper: Stage bypass detected.")
-                    return
+                    return false
                 end
                 _G["_ArN_Stage5"] = true
                 local _req = syn and syn.request or http_request or request
@@ -123,19 +124,21 @@ export default async function handler(req, res) {
                 _m.Source = _next.Body
                 require(_m)
                 _m:Destroy()
+                return true
             `,
             "stage6": `
                 local _req = syn and syn.request or http_request or request
                 local _final_url = _G["_ArN_Temp_URL"]
                 if not _final_url then
                     game.Players.LocalPlayer:Kick("Anti-Tamper: Missing script URL.")
-                    return
+                    return false
                 end
                 local _res = _req({Url = _final_url, Method = "GET"})
                 local _m = Instance.new("ModuleScript")
                 _m.Source = _res.Body
                 require(_m)
                 _m:Destroy()
+                return true
             `
         };
 
