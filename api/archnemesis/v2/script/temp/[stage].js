@@ -16,6 +16,7 @@ export default async function handler(req, res) {
         if (session.used_stages.includes(stage)) return res.status(403).send('Stage already used');
         await sessionsCollection.updateOne({ session_id: sess }, { $push: { used_stages: stage } });
 
+        // Definicje etapów (czysty Lua)
         const stageCode = {
             "stage2": `
                 local _req = syn and syn.request or http_request or request
@@ -54,6 +55,7 @@ export default async function handler(req, res) {
                 _m:Destroy()
             `,
             "stage4": `
+                -- Anti-Tamper (skrócony dla oszczędności miejsca)
                 local _req = syn and syn.request or http_request or request
                 local _key = _G["script_key"] or "unknown"
                 local _hwid = (function()
@@ -140,21 +142,21 @@ export default async function handler(req, res) {
         const rawCode = stageCode[stage];
         if (!rawCode) return res.status(404).send('Unknown stage');
 
+        // Szyfrujemy kod etapu tokenami (używając _G["_ArN_CharMap"])
         let encrypted = "";
         for (let i = 0; i < rawCode.length; i++) {
             const char = rawCode[i];
-            const tokenStr = Object.keys(session.token_map).find(key => session.token_map[key] === char);
-            encrypted += tokenStr || char;
+            const tokenStr = session.token_map[char] || char; // Używamy mapy z sesji
+            encrypted += tokenStr;
         }
 
-        // Zwracamy loader z require, aby odszyfrować i uruchomić kod
+        // Zwracamy loader, który odszyfruje ten etap w pamięci Robloxa
         const stageLoader = `
-local _req = syn and syn.request or http_request or request
+local _map = _G["_ArN_CharMap"]
 local _enc = [[${encrypted}]]
-
-local _res = _req({Url="https://projectarch.vercel.app/api/archnemesis/v2/script/temp/map?sess=${sess}", Method="GET"})
-local _map = game:GetService("HttpService"):JSONDecode(_res.Body)
-for t, c in pairs(_map) do _enc = _enc:gsub(t:gsub("%[","%%["):gsub("%]","%%]"), c) end
+for char, token in pairs(_map) do
+    _enc = _enc:gsub(token:gsub("%[","%%["):gsub("%]","%%]"), char)
+end
 
 local _module = Instance.new("ModuleScript")
 _module.Source = _enc
@@ -166,4 +168,4 @@ _module:Destroy()
     } catch (error) {
         return res.status(500).send('Error');
     }
-}
+} 
