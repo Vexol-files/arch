@@ -145,7 +145,7 @@ export default async function handler(req, res) {
         const rawCode = stageCode[stage];
         if (!rawCode) return res.status(404).send('Unknown stage');
 
-        // Na razie bez szyfrowania tokenami, żeby przetestować, czy działa
+        // Zwracamy kod etapu bez szyfrowania (na razie, żeby przetestować)
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(rawCode);
     } catch (error) {
