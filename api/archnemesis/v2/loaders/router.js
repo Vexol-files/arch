@@ -25,9 +25,22 @@ export default async function handler(req, res) {
         await db.collection('sessions').insertOne({ session_id: sessionId, used_stages: [] });
 
         const luaLoader = `
+-- 1. ZAPISUJEMY SCRIPT_KEY GLOBALNIE (dla wszystkich środowisk)
+if script_key then
+    if getgenv then getgenv().script_key = script_key end
+    _G["script_key"] = script_key
+    if shared then shared.script_key = script_key end
+end
+
+-- 2. ZAPISUJEMY SESJĘ I TOKEN GLOBALNIE
+if getgenv then
+    getgenv()._ArN_Session = "${sessionId}"
+    getgenv()._ArN_Token = "${runToken}"
+end
 _G["_ArN_Session"] = "${sessionId}"
 _G["_ArN_Token"] = "${runToken}"
 
+-- 3. POBIERAMY GENERATE_LOADER.JS
 local _req = syn and syn.request or http_request or request
 local _gen_url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/generate_loader?token=${runToken}&sess=${sessionId}"
 local _gen_code = _req({Url = _gen_url, Method = "GET"})
