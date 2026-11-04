@@ -18,7 +18,6 @@ export default async function handler(req, res) {
 
         if (!scriptData) return res.status(404).send('-- Error: Script not found');
 
-        // 1. Generujemy token i sesję
         const runToken = crypto.randomBytes(16).toString('hex');
         const sessionId = crypto.randomBytes(16).toString('hex');
 
@@ -31,16 +30,15 @@ export default async function handler(req, res) {
         });
         await db.collection('sessions').insertOne({ session_id: sessionId, used_stages: [] });
 
-        // 2. Zwracamy kod, który pobiera główny loader (loader_obf.lua)
         const luaLoader = `
 _G["_ArN_Session"] = "${sessionId}"
 _G["_ArN_Token"] = "${runToken}"
 
 local _req = syn and syn.request or http_request or request
-local _loader_url = "https://raw.githubusercontent.com/Vexol-files/arch/main/loader_obf.lua"
-local _res = _req({Url = _loader_url, Method = "GET"})
+local _gen_url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/generate_loader?token=${runToken}&sess=${sessionId}"
+local _gen_code = _req({Url = _gen_url, Method = "GET"})
 
-if not _res or not _res.Body or #_res.Body < 50 then
+if not _gen_code or not _gen_code.Body or #_gen_code.Body < 50 then
     game.Players.LocalPlayer:Kick("Failed to download loader.")
     return
 end
@@ -52,7 +50,7 @@ for k, v in pairs(_G) do
         break
     end
 end
-_realLoadstring(_res.Body)()
+_realLoadstring(_gen_code.Body)()
         `;
 
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
