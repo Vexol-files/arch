@@ -209,10 +209,13 @@ export default async function handler(req, res) {
         const rawCode = stageCode[stage];
         if (!rawCode) return res.status(404).send('Unknown stage');
 
-        // 3. Sprawdzamy, czy sesja nie zużyła już tego stage'a
-        if (session.used_stages.includes(stage)) return res.status(403).send('Stage already used');
+        // 3. ZABEZPIECZENIE: Blokujemy ponowne użycie TYLKO dla finałowego Stage 6.
+        // Gracze mogą w kółko powtarzać Stage 2-5 (np. po błędzie internetu).
+        if (stage === 'stage6' && session.used_stages.includes(stage)) {
+            return res.status(403).send('Stage already used');
+        }
 
-        // 4. Oznaczamy stage jako użyty DOPIERO TERAZ (po sprawdzeniu, że kod istnieje i nie był użyty)
+        // 4. Oznaczamy stage jako użyty
         await sessionsCollection.updateOne({ session_id: sess }, { $push: { used_stages: stage } });
 
         // 5. Zwracamy kod Lua
