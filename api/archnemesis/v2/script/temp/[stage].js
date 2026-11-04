@@ -33,13 +33,23 @@ export default async function handler(req, res) {
                 local HttpService = game:GetService("HttpService")
                 local _req = syn and syn.request or http_request or request
                 local _script_key = _G["script_key"]
+                
+                -- FALLBACK: Jeśli plik się nie odczyta, użyj domyślnego API (zapobiega błędowi nil)
+                local _api_url = "https://projectarch.vercel.app/api/archnemesis/v2/keys/router"
                 local _j1 = _G["_ArN_Json1"]
-                local _data1 = HttpService:JSONDecode(readfile(_j1))
-                local _api_url = _data1.api_url
+                
+                if _j1 and isfile(_j1) then
+                    local ok, data = pcall(function() return HttpService:JSONDecode(readfile(_j1)) end)
+                    if ok and data and data.api_url then
+                        _api_url = data.api_url
+                    end
+                end
+
                 local _hwid = gethwid and gethwid() or "unknown"
                 local _verify_url = _api_url .. "?action=verify_key&script_key=" .. _script_key .. "&hwid=" .. _hwid
                 local _res = _req({Url = _verify_url, Method = "GET"})
                 local _verify_data = HttpService:JSONDecode(_res.Body)
+                
                 if not _verify_data.success then
                     local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua"
                     local _kick = _req({Url = kickUrl, Method = "GET"})
@@ -73,8 +83,6 @@ export default async function handler(req, res) {
                     if ok and h then return h end
                     local ok2, h2 = pcall(function() return syn and syn.get_hwid and syn:get_hwid() end)
                     if ok2 and h2 then return h2 end
-                    local ok3, plr = pcall(function() return game.Players.LocalPlayer end)
-                    if ok3 and plr then return plr.UserId .. "_" .. plr.Name end
                     return "unknown"
                 end)()
 
@@ -108,11 +116,8 @@ export default async function handler(req, res) {
                     if not ok or res ~= 1337 then triggerBan() end
                     if not isPureC(loadstring) then triggerBan() end
                 end
-                do
-                    if not isPureC(debug.info) then triggerBan() end
-                    local ok, s, l, f = pcall(debug.info, pcall, "slf")
-                    if not ok or s ~= "[C]" or l ~= -1 or not rawequal(f, pcall) then triggerBan() end
-                end
+                
+                -- Usunięto test debug.info (powodował fałszywe bany na niektórych executorach)
                 do
                     if syn and syn.request and not isPureC(syn.request) then triggerBan() end
                     if type(game.HttpGet) == "function" and not isPureC(game.HttpGet) then triggerBan() end
