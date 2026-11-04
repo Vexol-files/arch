@@ -32,7 +32,6 @@ local function _kick(fileName)
     local _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/" .. fileName
     local _k = _req({Url = _kickUrl, Method = "GET"})
     
-    -- Sprawdzamy, czy GitHub zwrócił kod Lua, a nie 404
     if _k and _k.Body and #_k.Body > 20 and string.sub(_k.Body, 1, 1) ~= "<" 
        and not string.find(_k.Body, "404: Not Found", 1, true) then
         local _rl = loadstring
@@ -83,19 +82,23 @@ _G["_ArN_Folder"] = _fName
 -- 5. Ładowanie Stage 2
 local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _session_id, Method = "GET"})
 
--- 6. POPRAWIONE SPRAWDZANIE CZY TO KOD LUA (ignoruje spacje na początku)
+-- 6. NOWE SPRAWDZANIE CZY TO KOD LUA
 local _isValid = false
 if _res and _res.Body and #_res.Body > 20 then
     local _body = _res.Body
-    local _trimmed = string.match(_body, "^%s*(.-)$")
-    
-    if string.sub(_trimmed, 1, 1) ~= "<" 
-       and not string.find(_body, "The page could not be found", 1, true)
+    if not string.find(_body, "The page could not be found", 1, true)
        and not string.find(_body, "404: Not Found", 1, true)
        and not string.find(_body, "FUNCTION_INVOCATION_FAILED", 1, true)
        and not string.find(_body, "Stage already used", 1, true)
-       and (string.find(_trimmed, "^local") or string.find(_trimmed, "^return") or string.find(_trimmed, "^if")) then
-        _isValid = true
+       and not string.find(_body, "Session not found", 1, true)
+       and not string.find(_body, "<!DOCTYPE", 1, true)
+       and not string.find(_body, "<html", 1, true) then
+       
+        if string.find(_body, "local ", 1, true) 
+           or string.find(_body, "return ", 1, true) 
+           or string.find(_body, "if ", 1, true) then
+            _isValid = true
+        end
     end
 end
 
