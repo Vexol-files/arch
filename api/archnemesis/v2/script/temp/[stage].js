@@ -13,13 +13,15 @@ export default async function handler(req, res) {
         const session = await sessionsCollection.findOne({ session_id: sess });
         if (!session) return res.status(404).send('Session not found');
 
-        if (session.used_stages.includes(stage)) return res.status(403).send('Stage already used');
-        await sessionsCollection.updateOne({ session_id: sess }, { $push: { used_stages: stage } });
-
+        // 1. Definiujemy kody wszystkich stage'y
         const stageCode = {
             "stage2": `
                 local _req = syn and syn.request or http_request or request
                 local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage3?sess=" .. _G["_ArN_Session"], Method = "GET"})
+                if not _res or not _res.Body or #_res.Body < 20 or string.find(_res.Body, "Stage already used", 1, true) or string.find(_res.Body, "Session not found", 1, true) then
+                    game.Players.LocalPlayer:Kick("Failed to load stage 3.")
+                    return
+                end
                 local _realLoadstring = loadstring
                 for k, v in pairs(_G) do
                     if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
@@ -34,6 +36,10 @@ export default async function handler(req, res) {
                 local _req = syn and syn.request or http_request or request
                 local _script_key = _G["script_key"]
                 local _j1 = _G["_ArN_Json1"]
+                if not _script_key or not _j1 then
+                    game.Players.LocalPlayer:Kick("Anti-Tamper: Missing data.")
+                    return
+                end
                 local _data1 = HttpService:JSONDecode(readfile(_j1))
                 local _api_url = _data1.api_url
                 local _hwid = gethwid and gethwid() or "unknown"
@@ -66,6 +72,12 @@ export default async function handler(req, res) {
                 _G["_ArN_Temp_URL"] = _verify_data.next_stage
                 _G["_ArN_Stage3"] = true
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. _G["_ArN_Session"], Method = "GET"})
+                
+                if not _next or not _next.Body or #_next.Body < 20 or string.find(_next.Body, "Stage already used", 1, true) then
+                    game.Players.LocalPlayer:Kick("Failed to load stage 4.")
+                    return
+                end
+
                 local _realLoadstring = loadstring
                 for k, v in pairs(_G) do
                     if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
@@ -130,6 +142,12 @@ export default async function handler(req, res) {
 
                 _G["_ArN_Stage4"] = true
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage5?sess=" .. _G["_ArN_Session"], Method = "GET"})
+                
+                if not _next or not _next.Body or #_next.Body < 20 or string.find(_next.Body, "Stage already used", 1, true) then
+                    game.Players.LocalPlayer:Kick("Failed to load stage 5.")
+                    return
+                end
+
                 local _realLoadstring = loadstring
                 for k, v in pairs(_G) do
                     if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
@@ -147,6 +165,12 @@ export default async function handler(req, res) {
                 _G["_ArN_Stage5"] = true
                 local _req = syn and syn.request or http_request or request
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage6?sess=" .. _G["_ArN_Session"], Method = "GET"})
+                
+                if not _next or not _next.Body or #_next.Body < 20 or string.find(_next.Body, "Stage already used", 1, true) then
+                    game.Players.LocalPlayer:Kick("Failed to load stage 6.")
+                    return
+                end
+
                 local _realLoadstring = loadstring
                 for k, v in pairs(_G) do
                     if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
@@ -164,6 +188,12 @@ export default async function handler(req, res) {
                     return
                 end
                 local _res = _req({Url = _final_url, Method = "GET"})
+                
+                if not _res or not _res.Body or #_res.Body < 20 then
+                    game.Players.LocalPlayer:Kick("Failed to load final script.")
+                    return
+                end
+
                 local _realLoadstring = loadstring
                 for k, v in pairs(_G) do
                     if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
@@ -175,10 +205,17 @@ export default async function handler(req, res) {
             `
         };
 
+        // 2. Sprawdzamy, czy taki stage w ogóle istnieje
         const rawCode = stageCode[stage];
         if (!rawCode) return res.status(404).send('Unknown stage');
 
-        // Zwracamy czysty kod Lua (bez szyfrowania)
+        // 3. Sprawdzamy, czy sesja nie zużyła już tego stage'a
+        if (session.used_stages.includes(stage)) return res.status(403).send('Stage already used');
+
+        // 4. Oznaczamy stage jako użyty DOPIERO TERAZ (po sprawdzeniu, że kod istnieje i nie był użyty)
+        await sessionsCollection.updateOne({ session_id: sess }, { $push: { used_stages: stage } });
+
+        // 5. Zwracamy kod Lua
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(rawCode);
     } catch (error) {
