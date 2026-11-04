@@ -1,35 +1,43 @@
--- Zdeobfuskowany główny loader (wersja z router.js)
--- (Ten, który user wkleja do executora)
+--[[
+  Archnemesis Loader (Faza 1)
+  Ten kod jest generowany przez Vercel i wklejany do executora.
+  Pobiera główny zobfuskowany loader z GitHuba i go uruchamia.
+]]
 
-local _session = string.format("%s", "__SESSION_ID__")
-local _token = string.format("%s", "__RUN_TOKEN__")
-_G["_ArN_Session"] = _session
-_G["_ArN_Token"] = _token
+local _session_id = string.format("%s", "__SESSION_ID__")
+local _run_token  = string.format("%s", "__RUN_TOKEN__")
+local _build_ver  = string.format("%s", "__BUILD_VERSION__")
+
+_G["_ArN_Session"] = _session_id
+_G["_ArN_Token"]   = _run_token
 
 local _req = syn and syn.request or http_request or request
 local HttpService = game:GetService("HttpService")
 
--- 1. Pobieranie 2 plików JSON z API
-local _json1_res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/get_json?token=" .. _token .. "&file=json1", Method = "GET"})
-local _json2_res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/get_json?token=" .. _token .. "&file=json2", Method = "GET"})
+-- Bezpieczna funkcja kicka (działa nawet w DataModel "Ugc")
+local function _kickPlayer(msg)
+    local ok, players = pcall(function() return game:GetService("Players") end)
+    if ok and players and players.LocalPlayer then
+        players.LocalPlayer:Kick(msg)
+    else
+        error(msg, 0)
+    end
+end
 
--- 2. Zapis na dysku
-local _fName = "ArN_Cache_" .. tostring(math.random(100000, 999999))
-local _f1 = _fName .. "/config_1.json"
-local _f2 = _fName .. "/config_2.json"
-if not isfolder(_fName) then makefolder(_fName) end
-writefile(_f1, _json1_res.Body)
-writefile(_f2, _json2_res.Body)
+-- Pobieramy główny zobfuskowany loader z GitHuba
+local GITHUB_LOADER_URL = "https://raw.githubusercontent.com/Vexol-files/arch/main/loader.lua"
 
--- 3. Zapis ścieżek w pamięci
-_G["_ArN_Json1"] = _f1
-_G["_ArN_Json2"] = _f2
-_G["_ArN_Folder"] = _fName
+local _loader_res = _req({Url = GITHUB_LOADER_URL, Method = "GET"})
 
--- 4. Ładowanie Stage 2
-local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _session, Method = "GET"})
+-- Sprawdzamy, czy GitHub zwrócił kod Lua
+if not _loader_res or not _loader_res.Body or #_loader_res.Body < 50 
+   or string.sub(_loader_res.Body, 1, 1) == "<"
+   or string.find(_loader_res.Body, "404: Not Found", 1, true) then
+    _kickPlayer("Failed to download loader. Rejoin.")
+    return
+end
 
--- 5. Znalezienie oryginalnego loadstring z C++ (omijanie hooka)
+-- Znajdujemy oryginalny loadstring (omijanie hooków)
 local _realLoadstring = loadstring
 for k, v in pairs(_G) do
     if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
@@ -38,4 +46,10 @@ for k, v in pairs(_G) do
     end
 end
 
-_realLoadstring(_res.Body)()
+if type(_realLoadstring) ~= "function" then
+    _kickPlayer("loadstring not found.")
+    return
+end
+
+-- Uruchamiamy główny loader
+_realLoadstring(_loader_res.Body)()
