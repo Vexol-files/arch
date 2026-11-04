@@ -1,41 +1,64 @@
---[[
-  Archnemesis Loader
-  Build: __BUILD_VERSION__
-]]
+// api/archnemesis/v2/loaders/generate_loader.js
+import { MongoClient } from 'mongodb';
+import crypto from 'crypto';
 
-_G["_ArN_Session"] = string.format("%s", "__SESSION_ID__")
-_G["_ArN_Token"] = string.format("%s", "__RUN_TOKEN__")
+const client = new MongoClient(process.env.MONGODB_URI);
 
-local _req = syn and syn.request or http_request or request
-local HttpService = game:GetService("HttpService")
+export default async function handler(req, res) {
+    const { token, sess } = req.query;
+    if (!token) return res.status(400).send('Missing token');
 
--- 1. Pobieramy 2 pliki JSON z API (Vercel)
-local _json1_res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/get_json?token=" .. _G["_ArN_Token"] .. "&file=json1", Method = "GET"})
-local _json2_res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/get_json?token=" .. _G["_ArN_Token"] .. "&file=json2", Method = "GET"})
+    try {
+        await client.connect();
+        const db = client.db('loader_system');
 
--- 2. Zapisujemy je na dysku
-local _fName = "ArN_Cache_" .. tostring(math.random(100000, 999999))
-local _f1 = _fName .. "/config_1.json"
-local _f2 = _fName .. "/config_2.json"
-if not isfolder(_fName) then makefolder(_fName) end
-writefile(_f1, _json1_res.Body)
-writefile(_f2, _json2_res.Body)
+        // Sprawdzamy, czy sesja istnieje (opcjonalne, ale dobre dla bezpieczeństwa)
+        const session = await db.collection('sessions').findOne({ session_id: sess });
+        if (!session) return res.status(404).send('Session not found');
 
--- 3. Zapisujemy ścieżki w pamięci
-_G["_ArN_Json1"] = _f1
-_G["_ArN_Json2"] = _f2
-_G["_ArN_Folder"] = _fName
+        // Główny kod, który zostanie wstrzyknięty z podmienionymi wartościami
+        const loaderCode = `
+            _G["_ArN_Session"] = "${sess}"
+            local _req = syn and syn.request or http_request or request
+            local HttpService = game:GetService("HttpService")
 
--- 4. Ładujemy Stage 2
-local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _G["_ArN_Session"], Method = "GET"})
+            -- 1. Pobieramy 2 pliki JSON z API (Vercel)
+            local _json1_res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/get_json?token=${token}&file=json1", Method = "GET"})
+            local _json2_res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/loaders/get_json?token=${token}&file=json2", Method = "GET"})
 
--- 5. Znajdujemy oryginalny loadstring z C++ (omijając hooka)
-local _realLoadstring = loadstring
-for k, v in pairs(_G) do
-    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
-        _realLoadstring = v
-        break
-    end
-end
+            -- 2. Zapisujemy je na dysku
+            local _fName = "ArN_Cache_" .. tostring(math.random(100000, 999999))
+            local _f1 = _fName .. "/config_1.json"
+            local _f2 = _fName .. "/config_2.json"
+            if not isfolder(_fName) then makefolder(_fName) end
+            writefile(_f1, _json1_res.Body)
+            writefile(_f2, _json2_res.Body)
 
-_realLoadstring(_res.Body)()
+            -- 3. Zapisujemy ścieżki w pamięci
+            _G["_ArN_Json1"] = _f1
+            _G["_ArN_Json2"] = _f2
+            _G["_ArN_Folder"] = _fName
+
+            -- 4. Ładujemy Stage 2
+            local _res = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage2?sess=" .. _G["_ArN_Session"], Method = "GET"})
+
+            -- 5. Znajdujemy oryginalny loadstring z C++ (omijając hooka)
+            local _realLoadstring = loadstring
+            for k, v in pairs(_G) do
+                if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                    _realLoadstring = v
+                    break
+                end
+            end
+
+            _realLoadstring(_res.Body)()
+        `;
+
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        return res.status(200).send(loaderCode);
+
+    } catch (error) {
+        console.error('Generate Loader Error:', error);
+        return res.status(500).send('-- Error: Internal Server Error');
+    }
+}
