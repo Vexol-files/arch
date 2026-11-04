@@ -32,11 +32,18 @@ export default async function handler(req, res) {
             "stage3": `
                 local HttpService = game:GetService("HttpService")
                 local _req = syn and syn.request or http_request or request
+                
+                -- Bezpieczny kick (działa nawet w DataModel "Ugc")
+                local function _kickPlayer(msg)
+                    local ok, players = pcall(function() return game:GetService("Players") end)
+                    if ok and players and players.LocalPlayer then players.LocalPlayer:Kick(msg) else error(msg, 0) end
+                end
+
                 local _script_key = _G["script_key"]
                 
                 -- ZABEZPIECZENIE: Sprawdzamy, czy użytkownik podał script_key
                 if not _script_key or _script_key == "" then
-                    game.Players.LocalPlayer:Kick("Błąd: Nie podano script_key! Wpisz script_key = 'twoj_klucz' przed odpaleniem.")
+                    _kickPlayer("Błąd: Nie podano script_key! Wpisz script_key = 'twoj_klucz' przed odpaleniem.")
                     return
                 end
 
