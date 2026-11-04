@@ -34,7 +34,12 @@ export default async function handler(req, res) {
                 local _req = syn and syn.request or http_request or request
                 local _script_key = _G["script_key"]
                 
-                -- FALLBACK: Jeśli plik się nie odczyta, użyj domyślnego API (zapobiega błędowi nil)
+                -- ZABEZPIECZENIE: Sprawdzamy, czy użytkownik podał script_key
+                if not _script_key or _script_key == "" then
+                    game.Players.LocalPlayer:Kick("Błąd: Nie podano script_key! Wpisz script_key = 'twoj_klucz' przed odpaleniem.")
+                    return
+                end
+
                 local _api_url = "https://projectarch.vercel.app/api/archnemesis/v2/keys/router"
                 local _j1 = _G["_ArN_Json1"]
                 
