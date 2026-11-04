@@ -16,7 +16,7 @@ export default async function handler(req, res) {
         await sessionsCollection.insertOne({ session_id: sessionId, used_stages: [] });
 
         // Pobierz zobfuskowany loader z GitHuba
-        const loaderRes = await fetch('https://projectarch.vercel.app/api/archnemesis/v2/loaders/loader.lua');
+        const loaderRes = await fetch('https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/loader.lua');
         if (!loaderRes.ok) throw new Error('Failed to fetch loader');
         let loaderCode = await loaderRes.text();
 
