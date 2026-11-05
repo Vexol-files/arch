@@ -101,7 +101,7 @@ export default async function handler(req, res) {
                 local function triggerBan()
                     local _ban_url = "https://projectarch.vercel.app/api/archnemesis/v2/keys/router?action=ban&reason=Tamper_1&script_key=" .. _key .. "&hwid=" .. _hwid
                     pcall(function() _req({Url = _ban_url, Method = "GET"}) end)
-                    local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/tamper1.lua"
+                    local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/tamper.lua"
                     pcall(function()
                         local _kick = _req({Url = kickUrl, Method = "GET"})
                         local _realLoadstring = loadstring
