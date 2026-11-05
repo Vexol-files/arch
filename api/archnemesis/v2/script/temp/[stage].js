@@ -32,23 +32,29 @@ export default async function handler(req, res) {
             "stage3": `
                 local HttpService = game:GetService("HttpService")
                 local _req = syn and syn.request or http_request or request
-                
-                -- Bezpieczny kick (działa nawet w DataModel "Ugc")
+
+                -- 1. Pobieranie script_key (getgenv -> _G -> shared)
+                local function _get_script_key()
+                    if getgenv and getgenv().script_key then return getgenv().script_key end
+                    if _G.script_key then return _G.script_key end
+                    if shared and shared.script_key then return shared.script_key end
+                    return nil
+                end
+
                 local function _kickPlayer(msg)
                     local ok, players = pcall(function() return game:GetService("Players") end)
                     if ok and players and players.LocalPlayer then players.LocalPlayer:Kick(msg) else error(msg, 0) end
                 end
 
-                local _script_key = _G["script_key"]
-                
-                -- ZABEZPIECZENIE: Sprawdzamy, czy użytkownik podał script_key
+                local _script_key = _get_script_key()
                 if not _script_key or _script_key == "" then
-                    _kickPlayer("Błąd: Nie podano script_key! Wpisz script_key = 'twoj_klucz' przed odpaleniem.")
+                    _kickPlayer("Error: Missing script_key!")
                     return
                 end
 
+                -- 2. Pobieranie api_url (z fallbackiem)
                 local _api_url = "https://projectarch.vercel.app/api/archnemesis/v2/keys/router"
-                local _j1 = _G["_ArN_Json1"]
+                local _j1 = _G._ArN_Json1 or (getgenv and getgenv()._ArN_Json1)
                 
                 if _j1 and isfile(_j1) then
                     local ok, data = pcall(function() return HttpService:JSONDecode(readfile(_j1)) end)
@@ -57,14 +63,23 @@ export default async function handler(req, res) {
                     end
                 end
 
+                -- 3. Weryfikacja klucza
                 local _hwid = gethwid and gethwid() or "unknown"
                 local _verify_url = _api_url .. "?action=verify_key&script_key=" .. _script_key .. "&hwid=" .. _hwid
                 local _res = _req({Url = _verify_url, Method = "GET"})
                 local _verify_data = HttpService:JSONDecode(_res.Body)
                 
+                -- 4. Reakcja na błąd weryfikacji
                 if not _verify_data.success then
-                    local kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua"
-                    local _kick = _req({Url = kickUrl, Method = "GET"})
+                    local _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua" -- Domyślny kick
+                    
+                    if _verify_data.error == "banned" then
+                        _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/blacklist.lua"
+                    elseif _verify_data.error == "invalid_hwid" then
+                        _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/hwid.lua"
+                    end
+                    
+                    local _kick = _req({Url = _kickUrl, Method = "GET"})
                     local _realLoadstring = loadstring
                     for k, v in pairs(_G) do
                         if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
@@ -75,9 +90,14 @@ export default async function handler(req, res) {
                     _realLoadstring(_kick.Body)()
                     return
                 end
-                _G["_ArN_Temp_URL"] = _verify_data.next_stage
-                _G["_ArN_Stage3"] = true
-                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. _G["_ArN_Session"], Method = "GET"})
+
+                -- 5. Sukces - ładujemy Stage 4
+                _G._ArN_Temp_URL = _verify_data.next_stage
+                _G._ArN_Stage3 = true
+                local _session = (getgenv and getgenv()._ArN_Session) or _G._ArN_Session
+                
+                local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. _session, Method = "GET"})
+                
                 local _realLoadstring = loadstring
                 for k, v in pairs(_G) do
                     if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
