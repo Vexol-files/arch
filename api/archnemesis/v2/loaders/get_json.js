@@ -6,10 +6,10 @@ export default async function handler(req, res) {
     const configs = {
         json1: {
             api_url: "https://projectarch.vercel.app/api/archnemesis/v2/keys/router",
-            script_type: "premium"
+            script_type: "unnamed"
         },
         json2: {
-            script_type: "premium"
+            script_type: "unnamed"
         }
     };
 
