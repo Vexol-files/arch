@@ -184,21 +184,7 @@ export default async function handler(req, res) {
                 _realLoadstring(_next.Body)()
             `,
             "stage6": `
-                local _req = syn and syn.request or http_request or request
-                local _final_url = _G["_ArN_Temp_URL"]
-                if not _final_url then
-                    game.Players.LocalPlayer:Kick("Anti-Tamper: Missing script URL.")
-                    return
-                end
-                local _res = _req({Url = _final_url, Method = "GET"})
-                local _realLoadstring = loadstring
-                for k, v in pairs(_G) do
-                    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
-                        _realLoadstring = v
-                        break
-                    end
-                end
-                _realLoadstring(_res.Body)()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/vexol-files/arch/refs/heads/main/unnamed.lua
             `
         };
 
