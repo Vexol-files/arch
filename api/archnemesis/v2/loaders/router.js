@@ -8,24 +8,22 @@ export default async function handler(req, res) {
     const { file } = req.query;
     if (!file) return res.status(400).send('Missing file parameter');
 
-    const scriptType = file.replace('.lua', ''); // np. "premium"
+    const scriptType = file.replace('.lua', ''); // np. "unnamed"
+    
+    console.log(`[ROUTER] Otrzymano file: ${file}, scriptType: ${scriptType}`);
 
     try {
         await client.connect();
         const db = client.db('loader_system');
-        const updatesCollection = db.collection('updates');
-        const scriptData = await updatesCollection.findOne({ type: scriptType });
-
-        if (!scriptData) return res.status(404).send('-- Error: Script not found');
 
         const runToken = crypto.randomBytes(16).toString('hex');
         const sessionId = crypto.randomBytes(16).toString('hex');
 
-        // ZAPISUJEMY TYP SKRYPTU W SESJI
+        // ZAPISUJEMY TYP SKRYPTU W SESJI (bez sprawdzania w updates)
         await db.collection('sessions').insertOne({ 
             session_id: sessionId, 
             used_stages: [],
-            script_type: scriptType // <--- TU JEST KLUCZ
+            script_type: scriptType // <-- TU JEST KLUCZ
         });
 
         await db.collection('run_tokens').insertOne({ 
@@ -37,7 +35,7 @@ export default async function handler(req, res) {
         });
 
         const luaLoader = `
--- 1. ZAPISUJEMY SCRIPT_KEY GLOBALNIE (dla wszystkich środowisk)
+-- 1. ZAPISUJEMY SCRIPT_KEY GLOBALNIE
 if script_key then
     if getgenv then getgenv().script_key = script_key end
     _G["script_key"] = script_key
@@ -71,9 +69,11 @@ for k, v in pairs(_G) do
 end
 _realLoadstring(_gen_code.Body)()
         `;
+        
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         return res.status(200).send(luaLoader);
     } catch (error) {
+        console.error('Router Error:', error);
         return res.status(500).send('-- Error: Internal Server Error');
     }
 }
