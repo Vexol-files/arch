@@ -184,33 +184,33 @@ export default async function handler(req, res) {
                 _realLoadstring(_next.Body)()
             `,
             "stage6": `
-        local _req = syn and syn.request or http_request or request
-        local _session = (getgenv and getgenv()._ArN_Session) or _G._ArN_Session
-        local _token = (getgenv and getgenv()._ArN_Token) or _G._ArN_Token
+                local _req = syn and syn.request or http_request or request
+                local _session = (getgenv and getgenv()._ArN_Session) or _G._ArN_Session
+                local _token = (getgenv and getgenv()._ArN_Token) or _G._ArN_Token
 
-        if not _session then
-            game.Players.LocalPlayer:Kick("Anti-Tamper: Missing session.")
-            return
-        end
+                if not _session then
+                    game.Players.LocalPlayer:Kick("Anti-Tamper: Missing session.")
+                    return
+                end
 
-        -- Pytamy Vercela o finałowy kod, przekazując sesję i token
-        local _get_url = "https://projectarch.vercel.app/api/archnemesis/v2/cheats/get_cheat?sess=" .. _session .. "&token=" .. _token
-        local _res = _req({Url = _get_url, Method = "GET"})
+                -- Pytamy Vercela o finałowy kod, przekazując sesję i token
+                local _get_url = "https://projectarch.vercel.app/api/archnemesis/v2/cheats/get_cheat?sess=" .. _session .. "&token=" .. _token
+                local _res = _req({Url = _get_url, Method = "GET"})
 
-        if not _res or not _res.Body or #_res.Body < 20 then
-            game.Players.LocalPlayer:Kick("Failed to fetch final script.")
-            return
-        end
+                if not _res or not _res.Body or #_res.Body < 20 then
+                    game.Players.LocalPlayer:Kick("Failed to fetch final script.")
+                    return
+                end
 
-        local _realLoadstring = loadstring
-        for k, v in pairs(_G) do
-            if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
-                _realLoadstring = v
-                break
-            end
-        end
-        _realLoadstring(_res.Body)()
-`
+                local _realLoadstring = loadstring
+                for k, v in pairs(_G) do
+                    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                        _realLoadstring = v
+                        break
+                    end
+                end
+                _realLoadstring(_res.Body)()
+            `
         };
 
         const rawCode = stageCode[stage];
