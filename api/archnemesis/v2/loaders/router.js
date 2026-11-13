@@ -9,21 +9,26 @@ export default async function handler(req, res) {
     if (!file) return res.status(400).send('Missing file parameter');
 
     const scriptType = file.replace('.lua', ''); // np. "unnamed"
-    
-    console.log(`[ROUTER] Otrzymano file: ${file}, scriptType: ${scriptType}`);
 
     try {
         await client.connect();
         const db = client.db('loader_system');
+        
+        // 1. Sprawdzamy w bazie, czy ten skrypt ma keyless: true
+        const scriptData = await db.collection('updates').findOne({ type: scriptType });
+        
+        // Jeśli dokument nie istnieje, domyślnie keyless = false
+        const isKeyless = scriptData ? (scriptData.keyless === true) : false;
 
         const runToken = crypto.randomBytes(16).toString('hex');
         const sessionId = crypto.randomBytes(16).toString('hex');
 
-        // ZAPISUJEMY TYP SKRYPTU W SESJI (bez sprawdzania w updates)
+        // 2. Zapisujemy sesję (z informacją o keyless)
         await db.collection('sessions').insertOne({ 
             session_id: sessionId, 
             used_stages: [],
-            script_type: scriptType // <-- TU JEST KLUCZ
+            script_type: scriptType,
+            keyless: isKeyless // <--- ZAPISUJEMY KEYLESS
         });
 
         await db.collection('run_tokens').insertOne({ 
@@ -34,8 +39,9 @@ export default async function handler(req, res) {
             used: false 
         });
 
+        // 3. Generujemy kod Loadera 1
         const luaLoader = `
--- 1. ZAPISUJEMY SCRIPT_KEY GLOBALNIE
+-- 1. ZAPISUJEMY SCRIPT_KEY GLOBALNIE (dla wszystkich środowisk)
 if script_key then
     if getgenv then getgenv().script_key = script_key end
     _G["script_key"] = script_key
