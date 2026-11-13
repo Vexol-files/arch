@@ -144,22 +144,29 @@ export default async function handler(req, res) {
 
                 local _req = syn and syn.request or http_request or request
                 local _session = (getgenv and getgenv()._ArN_Session) or _G._ArN_Session
-                local _token = (getgenv and getgenv()._ArN_Token) or _G._ArN_Token
 
                 if not _session then
                     _kickPlayer("Anti-Tamper: Missing session.")
                     return
                 end
 
-                local _get_url = "https://projectarch.vercel.app/api/archnemesis/v2/cheats/get_cheat?sess=" .. _session .. "&token=" .. (_token or "")
+                local _get_url = "https://projectarch.vercel.app/api/archnemesis/v2/cheats/get_cheat?sess=" .. _session
                 local _res = _req({Url = _get_url, Method = "GET"})
 
                 if not _res or not _res.Body or #_res.Body < 20 then
-                    _kickPlayer("Failed to fetch final script.")
+                    _kickPlayer("Failed to fetch final loader script.")
                     return
                 end
                 
-                loadstring(_res.Body, true)()
+                local _realLoadstring = loadstring
+                for k, v in pairs(_G) do
+                    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                        _realLoadstring = v
+                        break
+                    end
+                end
+                
+                _realLoadstring(_res.Body)()
             `
         };
 
