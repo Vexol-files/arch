@@ -39,44 +39,75 @@ export default async function handler(req, res) {
                     if ok and players and players.LocalPlayer then players.LocalPlayer:Kick(msg) else error(msg, 0) end
                 end
 
-                local _script_key = _get_script_key()
-                if not _script_key or _script_key == "" then
-                    _kickPlayer("Error: Missing script_key!")
-                    return
-                end
-
-                local _api_url = "https://projectarch.vercel.app/api/archnemesis/v2/keys/router"
+                -- 1. Odczytujemy keyless z JSON-a
+                local _is_keyless = false
                 local _j1 = _G._ArN_Json1 or (getgenv and getgenv()._ArN_Json1)
                 
                 if _j1 and isfile(_j1) then
                     local ok, data = pcall(function() return HttpService:JSONDecode(readfile(_j1)) end)
-                    if ok and data and data.api_url then
-                        _api_url = data.api_url
+                    if ok and data and data.keyless == true then
+                        _is_keyless = true
                     end
                 end
 
-                local _hwid = gethwid and gethwid() or "unknown"
-                local _verify_url = _api_url .. "?action=verify_key&script_key=" .. _script_key .. "&hwid=" .. _hwid
-                local _res = _req({Url = _verify_url, Method = "GET"})
-                local _verify_data = HttpService:JSONDecode(_res.Body)
-                
-                if not _verify_data.success then
-                    local _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua"
-                    if _verify_data.error == "banned" then
-                        _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/blacklist.lua"
-                    elseif _verify_data.error == "invalid_hwid" then
-                        _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/hwid.lua"
+                -- 2. Jeśli keyless = true, pomijamy weryfikację
+                if not _is_keyless then
+                    local _script_key = _get_script_key()
+                    if not _script_key or _script_key == "" then
+                        _kickPlayer("Error: Missing script_key!")
+                        return
                     end
-                    local _kick = _req({Url = _kickUrl, Method = "GET"})
-                    loadstring(_kick.Body)()
-                    return
+
+                    local _api_url = "https://projectarch.vercel.app/api/archnemesis/v2/keys/router"
+                    if _j1 and isfile(_j1) then
+                        local ok, data = pcall(function() return HttpService:JSONDecode(readfile(_j1)) end)
+                        if ok and data and data.api_url then
+                            _api_url = data.api_url
+                        end
+                    end
+
+                    local _hwid = gethwid and gethwid() or "unknown"
+                    local _verify_url = _api_url .. "?action=verify_key&script_key=" .. _script_key .. "&hwid=" .. _hwid
+                    local _res = _req({Url = _verify_url, Method = "GET"})
+                    local _verify_data = HttpService:JSONDecode(_res.Body)
+                    
+                    if not _verify_data.success then
+                        local _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/key.lua"
+                        if _verify_data.error == "banned" then
+                            _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/blacklist.lua"
+                        elseif _verify_data.error == "invalid_hwid" then
+                            _kickUrl = "https://raw.githubusercontent.com/Vexol-files/archenmesis-kick/refs/heads/main/hwid.lua"
+                        end
+                        local _kick = _req({Url = _kickUrl, Method = "GET"})
+                        local _realLoadstring = loadstring
+                        for k, v in pairs(_G) do
+                            if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                                _realLoadstring = v
+                                break
+                            end
+                        end
+                        _realLoadstring(_kick.Body)()
+                        return
+                    end
+                else
+                    -- nothing else
                 end
 
-                _G._ArN_Temp_URL = _verify_data.next_stage
+                -- 3. Sukces - ładujemy Stage 4
+                _G._ArN_Temp_URL = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. ((getgenv and getgenv()._ArN_Session) or _G._ArN_Session)
                 _G._ArN_Stage3 = true
                 local _session = (getgenv and getgenv()._ArN_Session) or _G._ArN_Session
+                
                 local _next = _req({Url = "https://projectarch.vercel.app/api/archnemesis/v2/script/temp/stage4?sess=" .. _session, Method = "GET"})
-                loadstring(_next.Body)()
+                
+                local _realLoadstring = loadstring
+                for k, v in pairs(_G) do
+                    if type(v) == "function" and debug.getinfo(v).what == "C" and k == "loadstring" then
+                        _realLoadstring = v
+                        break
+                    end
+                end
+                _realLoadstring(_next.Body)()
             `,
             "stage4": `
                 local _req = syn and syn.request or http_request or request
