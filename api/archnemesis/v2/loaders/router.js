@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     const { file } = req.query;
     if (!file) return res.status(400).send('Missing file parameter');
 
-    const scriptType = file.replace('.lua', '');
+    const scriptType = file.replace('.lua', ''); // np. "premium"
 
     try {
         await client.connect();
@@ -21,8 +21,20 @@ export default async function handler(req, res) {
         const runToken = crypto.randomBytes(16).toString('hex');
         const sessionId = crypto.randomBytes(16).toString('hex');
 
-        await db.collection('run_tokens').insertOne({ token: runToken, session_id: sessionId, script_type: scriptType, created_at: new Date(), used: false });
-        await db.collection('sessions').insertOne({ session_id: sessionId, used_stages: [] });
+        // ZAPISUJEMY TYP SKRYPTU W SESJI
+        await db.collection('sessions').insertOne({ 
+            session_id: sessionId, 
+            used_stages: [],
+            script_type: scriptType // <--- TU JEST KLUCZ
+        });
+
+        await db.collection('run_tokens').insertOne({ 
+            token: runToken, 
+            session_id: sessionId, 
+            script_type: scriptType, 
+            created_at: new Date(), 
+            used: false 
+        });
 
         const luaLoader = `
 -- 1. ZAPISUJEMY SCRIPT_KEY GLOBALNIE (dla wszystkich środowisk)
@@ -59,7 +71,6 @@ for k, v in pairs(_G) do
 end
 _realLoadstring(_gen_code.Body)()
         `;
-
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         return res.status(200).send(luaLoader);
     } catch (error) {
