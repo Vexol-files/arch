@@ -14,15 +14,16 @@ export default async function handler(req, res) {
         const tokenData = await db.collection('run_tokens').findOne({ token: token });
         const scriptType = tokenData ? tokenData.script_type : "free";
 
-        // Sprawdzamy keyless dla tego skryptu
         const scriptData = await db.collection('updates').findOne({ type: scriptType });
-        const isKeyless = scriptData ? (scriptData.keyless === true) : false;
+        
+        // POPRAWKA: sprawdzamy stringa "true" i boolean true
+        const isKeyless = scriptData ? (scriptData.keyless === "true" || scriptData.keyless === true) : false;
 
         const configs = {
             json1: {
                 api_url: "https://projectarch.vercel.app/api/archnemesis/v2/keys/router",
                 script_type: scriptType,
-                keyless: isKeyless // <-- PRZEKAZUJEMY DO STAGE 3
+                keyless: isKeyless
             },
             json2: {
                 script_type: scriptType,
@@ -36,6 +37,7 @@ export default async function handler(req, res) {
         res.setHeader('Content-Type', 'application/json');
         return res.status(200).send(JSON.stringify(jsonData));
     } catch (error) {
+        console.error('Get JSON Error:', error);
         return res.status(500).send('Error');
     } finally {
         if (client) await client.close();
