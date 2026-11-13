@@ -2,7 +2,7 @@ if getgenv().KiciaRebuild and getgenv().KiciaRebuild.Unload then
     pcall(getgenv().KiciaRebuild.Unload)
 end
 if not game:IsLoaded() then game.Loaded:Wait() end
-print("[Kicia] script file executing, PlaceId=" .. tostring(game.PlaceId))
+
 
 local K: { [string]: any } = { connections = {}, cleanups = {}, destroyed = false }
 getgenv().KiciaRebuild = K
@@ -19029,9 +19029,7 @@ v116 = arg:WaitForChild(v115, 5)
 if v116 ~= nil then
 break
 end
-print("[Kicia] waiting for " .. arg:GetFullName() .. " -> " .. tostring(v115) .. " (" .. math.floor(os.clock() - _t0) .. "s)")
 if os.clock() - _t0 > 60 then
-error("[Kicia] timed out waiting for " .. arg:GetFullName() .. " -> " .. tostring(v115) .. ". Wrong game? This script is built for Rivals.", 2)
 end
 end
 end
@@ -67230,19 +67228,16 @@ end
 if not _ps then warn("[Kicia] ABORTED: no PlayerScripts"); return end
 local _ctrl = _ps:FindFirstChild("Controllers")
 if _ps and not _ctrl then
-print("[Kicia] waiting for PlayerScripts.Controllers ...")
 pcall(function() _ps:WaitForChild("Controllers", 30) end)
 _ctrl = _ps:FindFirstChild("Controllers")
 end
 if not _ctrl then
-warn("[Kicia] ABORTED: PlayerScripts.Controllers not found. This script is built for Rivals - remove it from autoexec if you are in a different game.")
 return
 end
 -- (no spawn gate: boot ASAP once data is ready)
 -- Adaptive fast boot: NO require() calls before boot (hands off the game's
 -- enum build). Boot as soon as the client looks alive: spawned + game HUD
 -- present. Usually seconds after join; 45s cap, then boot anyway.
-print("[Kicia] waiting for client to come alive ...")
 local _wt1 = os.clock()
 while os.clock() - _wt1 < 45 do
 local _ch = _lp.Character
@@ -67259,9 +67254,6 @@ end
 if _spawnedOk and _uiOk then break end
 task.wait(1)
 end
-print("[Kicia] client alive, booting ...")
-print("[Kicia] controllers ready, booting ...")
-print("[FIX] auto-exec/color picker by fin_wo")
 tbl17.j1()(bootFn())
 task.spawn(function()
 task.wait(60)
