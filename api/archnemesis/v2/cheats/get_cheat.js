@@ -19,10 +19,10 @@ export default async function handler(req, res) {
 
         // Definiujemy linki do cheatów na GitHubie
         const cheatUrls = {
-            "free": "https://raw.githubusercontent.com/Vexol-files/arch/main/cheats/free.lua",
-            "premium": "https://raw.githubusercontent.com/Vexol-files/arch/main/cheats/premium.lua",
-            "beta": "https://raw.githubusercontent.com/Vexol-files/arch/main/cheats/beta.lua",
-            "unnamed": "https://raw.githubusercontent.com/Vexol-files/arch/main/cheats/unnamed.lua"
+            "free": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/free.lua",
+            "premium": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/premium.lua",
+            "beta": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/beta.lua",
+            "unnamed": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/unnamed.lua"
         };
 
         const cheatUrl = cheatUrls[scriptType] || cheatUrls["free"];
