@@ -24,8 +24,8 @@ export default async function handler(req, res) {
             "free": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/free.lua",
             "premium": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/premium.lua",
             "beta": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/beta.lua",
-            "unnamed": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/unnamed.lua"
-            "kiciahook": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/kiciahook.lua"
+            "unnamed": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/unnamed.lua",
+            "kiciahook": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/kiciahook.lua",
             "sleepyhub": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/sleepyhub.lua"
         };
 
