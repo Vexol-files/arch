@@ -15,9 +15,11 @@ export default async function handler(req, res) {
             return res.status(404).send('Session not found');
         }
 
-        // POPRAWKA: Zmienna musi być scriptType (wielka litera T)
         const scriptType = session.script_type || "free";
         
+        // LOGOWANIE (zobaczysz to w Vercel -> Logs)
+        console.log(`[GET_CHEAT] Session: ${sess}, ScriptType: ${scriptType}`);
+
         const cheatUrls = {
             "free": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/free.lua",
             "premium": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/premium.lua",
