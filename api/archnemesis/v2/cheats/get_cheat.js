@@ -10,11 +10,14 @@ export default async function handler(req, res) {
         await client.connect();
         const db = client.db('loader_system');
         const session = await db.collection('sessions').findOne({ session_id: sess });
-        if (!session) return res.status(404).send('Session not found');
+        
+        if (!session) {
+            return res.status(404).send('Session not found');
+        }
 
+        // POPRAWKA: Zmienna musi być scriptType (wielka litera T)
         const scriptType = session.script_type || "free";
         
-        // Linki do plików na GitHubie
         const cheatUrls = {
             "free": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/free.lua",
             "premium": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/premium.lua",
@@ -22,16 +25,15 @@ export default async function handler(req, res) {
             "unnamed": "https://raw.githubusercontent.com/Vexol-files/arch/refs/heads/main/cheats/unnamed.lua"
         };
 
-        const cheatUrl = cheatUrls[script_type] || cheatUrls["free"];
+        const cheatUrl = cheatUrls[scriptType] || cheatUrls["free"];
 
-        // Generujemy prosty kod Lua
         const luaCode = `loadstring(game:HttpGet("${cheatUrl}"))()`;
 
         res.setHeader('Content-Type', 'text/plain');
         return res.status(200).send(luaCode);
 
     } catch (error) {
-        console.error(error);
-        return res.status(500).send('Error');
+        console.error('Get Cheat Error:', error);
+        return res.status(500).send('Error: ' + error.message);
     }
 }
