@@ -159,7 +159,7 @@ export default async function handler(req, res) {
                     return
                 end
                 
-                loadstring(_res.Body)()
+                loadstring(_res.Body, true)()
             `
         };
 
